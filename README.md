@@ -1,4 +1,4 @@
-# sArena for 3.3.5 version (backported from WoD)
+# sArena for 3.3.5 version (backported from WoD) fork fix
 
 #### Advanced settings
 * now ArenaEnemyCastBar can be moveable
