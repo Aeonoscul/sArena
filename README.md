@@ -1,5 +1,6 @@
 # sArena for 3.3.5 version (backported from WoD) fork fix
-
+fix pet
+fix df ui
 #### Advanced settings
 * now ArenaEnemyCastBar can be moveable
 * now ArenaEnemyCastBar can be set size or width
