@@ -12,6 +12,9 @@ function layout:SetFrameStyle(frame, db)
     frame.healthbar:ClearAllPoints()
     frame.manabar:ClearAllPoints()
     frame.texture:ClearAllPoints()
+    if frame.portraitFrame then
+        frame.portraitFrame:ClearAllPoints()
+    end
     if frame.auraFrame then
         frame.auraFrame:ClearAllPoints()
     end
@@ -19,17 +22,29 @@ function layout:SetFrameStyle(frame, db)
     local _maxHeight = (db.healthBarHeight + db.powerBarHeight)
 
     frame:SetSize(db.width + 4, db.height + 4)
-    frame.classPortrait:SetSize((_maxHeight - 2) / 1.5, (_maxHeight - 2) / 1.5)
-    frame.classPortrait:ClearAllPoints()
-    frame.classPortrait:Hide()
     frame.texture:Hide()
 
-    addon.squareClassPortrait = true
+    addon.squareClassPortrait = false
 
     frame.healthbar:SetWidth(db.width)
     frame.healthbar:SetHeight(db.healthBarHeight)
     frame.manabar:SetWidth(db.width)
     frame.manabar:SetHeight(db.powerBarHeight)
+
+    if not frame.portraitFrame then
+        frame.portraitFrame = CreateFrame("Frame", nil, frame)
+    end
+    frame.portraitFrame:SetFrameLevel(frame.healthbar:GetFrameLevel() + 2)
+    
+    local portraitSize = (_maxHeight - 2) / 2
+    frame.portraitFrame:SetSize(portraitSize, portraitSize)
+    
+    frame.classPortrait:SetParent(frame.portraitFrame)
+    frame.classPortrait:SetSize(portraitSize, portraitSize)
+    frame.classPortrait:ClearAllPoints()
+    frame.classPortrait:SetPoint("CENTER", frame.portraitFrame, "CENTER")
+    frame.classPortrait:SetDrawLayer("OVERLAY", 7)
+    frame.classPortrait:Show()
 
     frame.backgroundFrame:Show()
     frame.backgroundFrame:SetSize(db.width + 4, _maxHeight + 6)
@@ -37,14 +52,16 @@ function layout:SetFrameStyle(frame, db)
     if db.mirroredFrames then
         frame.healthbar:SetPoint("TOPLEFT")
         frame.name:SetPoint("TOPRIGHT", frame.healthbar, -1, -1)
+        frame.name:SetJustifyH("RIGHT")
         frame.backgroundFrame:SetPoint("TOPLEFT", frame, -2, 2)
-        frame.classPortrait:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", 1, -1)
+        frame.portraitFrame:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", 1, -1)
         frame.manabar:SetPoint("TOPLEFT", frame.healthbar, "BOTTOMLEFT", 0, -2)
     else
         frame.healthbar:SetPoint("TOPLEFT")
         frame.name:SetPoint("TOPLEFT", frame.healthbar, 1, -1)
+        frame.name:SetJustifyH("LEFT")
         frame.backgroundFrame:SetPoint("TOPLEFT", frame, -2, 2)
-        frame.classPortrait:SetPoint("TOPRIGHT", frame.healthbar, "TOPRIGHT", -1, -1)
+        frame.portraitFrame:SetPoint("TOPRIGHT", frame.healthbar, "TOPRIGHT", -1, -1)
         frame.manabar:SetPoint("TOPLEFT", frame.healthbar, "BOTTOMLEFT", 0, -2)
     end
 

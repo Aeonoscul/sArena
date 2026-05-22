@@ -3,9 +3,9 @@ local module = addon:CreateModule("Frame Styles")
 local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
-    frameStyle = "Blizz Arena",
+    frameStyle = "Blizz Arena Default",
     mirroredFrames = false,
-    barTexture = "Blizzard",
+    barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
     width = 150,
     height = 32,
     healthBarHeight = 18,
@@ -132,7 +132,7 @@ function module:OnEvent(event, ...)
             end
 
             if self.db.powerBarFontSize > 0 then
-                arenaFrame.manabar.TextString:SetFont(font, self.db.healthBarFontSize, flags)
+                arenaFrame.manabar.TextString:SetFont(font, self.db.powerBarFontSize, flags)
                 arenaFrame.manabar.TextString:Show()
             else
                 arenaFrame.manabar.TextString:Hide()

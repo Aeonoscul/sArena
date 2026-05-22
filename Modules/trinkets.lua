@@ -2,9 +2,9 @@ local addonName, addon = ...
 local module = addon:CreateModule("Trinkets")
 
 module.defaultSettings = {
-	x = -74,
-	y = -3,
-	size = 18,
+	x = -70,
+	y = 10,
+	size = 24,
 	hideCountdownNumbers = false,
 }
 

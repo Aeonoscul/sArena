@@ -3,14 +3,14 @@ local module = addon:CreateModule("Pet Frames")
 local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
-    x = -6,
-    y = -24,
-    scale = 1,
+    x = -40,
+    y = -42,
+    scale = 0.7,
     healthBarWidth = 50,
     healthBarHeight = 14,
     powerBarHeight = 8,
-    barTexture = "Blizzard",
-    frameSpacing = 20
+    barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
+    frameSpacing = 45
 }
 
 module.optionsTable = {
@@ -107,9 +107,8 @@ for i = 1, MAX_ARENA_ENEMIES do
     local arenaFrame = _G["ArenaEnemyFrame" .. i]
     local petFrame = arenaFrame.petFrame
 
-    petFrame:SetParent(arenaFrame)
+    -- petFrame:SetParent(arenaFrame)
     petFrame:SetMovable(true)
-    --petFrame:SetFrameLevel(1)
 
     addon:SetupDrag(module, true, petFrame)
     addon:SetupDrag(module, true, petFrame.healthbar, petFrame)
@@ -124,14 +123,21 @@ function module:OnEvent(event, ...)
         return;
     end
 
-    for i = 1, MAX_ARENA_ENEMIES do
+    for i = 1, 3 do
         local arenaFrame = _G["ArenaEnemyFrame" .. i]
         local petFrame = arenaFrame.petFrame
 
         if event == "TEST_MODE" then
             if addon.testMode and GetCVar("showArenaEnemyPets") == "1" then
+                petFrame.healthbar.lockColor = true
+                petFrame.healthbar:SetMinMaxValues(0, 100)
+                petFrame.healthbar:SetValue(100)
+                petFrame.healthbar:SetStatusBarColor(0, 1, 0)
+                petFrame.healthbar.forceHideText = false
+
                 petFrame:Show()
             else
+                petFrame.healthbar.lockColor = false
                 petFrame:Hide()
             end
 
@@ -141,7 +147,9 @@ function module:OnEvent(event, ...)
             petFrame:SetScale(self.db.scale)
 
             petFrame.healthbar:SetStatusBarTexture(self.db.barTexture)
-            petFrame.manabar:SetStatusBarTexture(self.db.barTexture)
+            if petFrame.manabar then
+                petFrame.manabar:SetStatusBarTexture(self.db.barTexture)
+            end
 
             for j = 1, MAX_ARENA_ENEMIES do
                 local currentPetFrame = _G["ArenaEnemyFrame" .. j].petFrame

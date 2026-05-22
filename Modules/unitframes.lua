@@ -4,8 +4,8 @@ local module = addon:CreateModule("Unit Frames")
 module.defaultSettings = {
     x = 350,
     y = 100,
-    scale = 1,
-    frameSpacing = 20,
+    scale = 1.3,
+    frameSpacing = 15,
     statusTextScale = 1,
     classColors = true,
     hideNames = false
@@ -93,28 +93,46 @@ function module:OnEvent(event, ...)
             sArenaEnemyFrames:Show()
             firstPlayerEnteringWorld = true
         end
-
     elseif event == "TEST_MODE" then
+        local testClasses = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
+        
         for i = 1, 3 do
             local arenaFrame = _G["ArenaEnemyFrame" .. i]
             if arenaFrame then
                 if addon.testMode then
+                    -- Сначала подготавливаем дефолт от близзард, чтобы он не затирал наши цвета
+                    ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
+
+                    arenaFrame.healthbar.lockColor = true
+                    arenaFrame.manabar.lockColor = true
+
+                    local randomClass = testClasses[math.random(1, #testClasses)]
+                    local c = RAID_CLASS_COLORS[randomClass]
+                    
+                    local r, g, b = 0.5, 0.5, 0.5
+                    if c then
+                        r, g, b = c.r, c.g, c.b
+                    end
+                    
                     arenaFrame.healthbar:SetMinMaxValues(0, 100)
                     arenaFrame.healthbar:SetValue(100)
+                    arenaFrame.healthbar:SetStatusBarColor(r, g, b)
                     arenaFrame.healthbar.forceHideText = false
+                    
                     arenaFrame.manabar:SetMinMaxValues(0, 100)
                     arenaFrame.manabar:SetValue(100)
                     arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
                     arenaFrame.manabar.forceHideText = false
-                    ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
+                    
                     arenaFrame.name:SetText("arena" .. i)
                     arenaFrame:Show()
                 else
+                    arenaFrame.healthbar.lockColor = false
+                    arenaFrame.manabar.lockColor = false
                     arenaFrame:Hide()
                 end
             end
         end
-
     elseif event == "UPDATE_SETTINGS" then
         if not sArenaEnemyFrames then return end
         
@@ -150,13 +168,13 @@ local UnitClass = UnitClass
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 local function colorStatusBar(statusbar)
+    if statusbar.lockColor then return end
+    
     if module.db.classColors and healthBars[statusbar:GetName()] then
         local _, class = UnitClass(statusbar.unit)
         if class then
             local c = RAID_CLASS_COLORS[class]
-            if not statusbar.lockColor then
-                statusbar:SetStatusBarColor(c.r, c.g, c.b)
-            end
+            statusbar:SetStatusBarColor(c.r, c.g, c.b)
         end
     end
 end

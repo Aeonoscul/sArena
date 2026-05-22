@@ -153,9 +153,9 @@ constellations2Spells = {
 }
 
 module.defaultSettings = {
-	x = -74,
-	y = -19,
-	size = 18,
+	x = -70,
+	y = -14,
+	size = 24,
 	hideCountdownNumbers = false,
 }
 
