@@ -56,6 +56,20 @@ sArenaEnemyFrames:Hide()
 sArenaEnemyFrames:SetMovable(true)
 ArenaEnemyFrames = dummyFrame
 
+sArenaEnemyFrames.GetParent = function() return UIParent end
+
+sArenaEnemyFrames.isManagedFrame = false
+sArenaEnemyFrames.isRightManagedFrame = false
+
+sArenaEnemyFrames.layoutParent = {
+    AddManagedFrame = function() end,
+    RemoveManagedFrame = function() end
+}
+
+if UIParentRightManagedFrameContainer and UIParentRightManagedFrameContainer.RemoveManagedFrame then
+    UIParentRightManagedFrameContainer:RemoveManagedFrame(sArenaEnemyFrames)
+end
+
 local firstPlayerEnteringWorld = false
 
 function module:OnEvent(event, ...)
@@ -66,11 +80,12 @@ function module:OnEvent(event, ...)
     if event == "ADDON_LOADED" then
         for i = 1, MAX_ARENA_ENEMIES do
             local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            addon:SetupDrag(module, false, arenaFrame, sArenaEnemyFrames)
-            addon:SetupDrag(module, false, arenaFrame.healthbar, sArenaEnemyFrames)
-            addon:SetupDrag(module, false, arenaFrame.manabar, sArenaEnemyFrames)
+            if arenaFrame then
+                addon:SetupDrag(module, true, arenaFrame, sArenaEnemyFrames)
+                addon:SetupDrag(module, true, arenaFrame.healthbar, sArenaEnemyFrames)
+                addon:SetupDrag(module, true, arenaFrame.manabar, sArenaEnemyFrames)
+            end
         end
-        -- ArenaEnemyBackground:SetParent(hiddenFrame)
         self:OnEvent("UPDATE_SETTINGS")
 
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -82,32 +97,41 @@ function module:OnEvent(event, ...)
     elseif event == "TEST_MODE" then
         for i = 1, 3 do
             local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            if addon.testMode then
-                arenaFrame.healthbar:SetMinMaxValues(0, 100)
-                arenaFrame.healthbar:SetValue(100)
-                arenaFrame.healthbar.forceHideText = false
-                arenaFrame.manabar:SetMinMaxValues(0, 100)
-                arenaFrame.manabar:SetValue(100)
-                arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
-                arenaFrame.manabar.forceHideText = false
-                ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
-                arenaFrame.name:SetText("arena" .. i)
-                arenaFrame:Show()
-            else
-                arenaFrame:Hide()
+            if arenaFrame then
+                if addon.testMode then
+                    arenaFrame.healthbar:SetMinMaxValues(0, 100)
+                    arenaFrame.healthbar:SetValue(100)
+                    arenaFrame.healthbar.forceHideText = false
+                    arenaFrame.manabar:SetMinMaxValues(0, 100)
+                    arenaFrame.manabar:SetValue(100)
+                    arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
+                    arenaFrame.manabar.forceHideText = false
+                    ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
+                    arenaFrame.name:SetText("arena" .. i)
+                    arenaFrame:Show()
+                else
+                    arenaFrame:Hide()
+                end
             end
         end
 
     elseif event == "UPDATE_SETTINGS" then
+        if not sArenaEnemyFrames then return end
+        
         sArenaEnemyFrames:ClearAllPoints()
-        sArenaEnemyFrames:SetPoint("CENTER", self.db.x, self.db.y)
-        sArenaEnemyFrames:SetScale(self.db.scale)
+        sArenaEnemyFrames:SetPoint("CENTER", UIParent, "CENTER", self.db.x or 0, self.db.y or 0)
+        sArenaEnemyFrames:SetScale(self.db.scale or 1)
         
         for i = 1, MAX_ARENA_ENEMIES do
             local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            arenaFrame.name:SetShown(not self.db.hideNames)
-            if i > 1 then
-                arenaFrame:SetPoint("TOP", _G["ArenaEnemyFrame" .. i - 1], "BOTTOM", 0, self.db.frameSpacing * -1)
+            if arenaFrame then
+                arenaFrame.name:SetShown(not self.db.hideNames)
+                arenaFrame:ClearAllPoints()
+                if i == 1 then
+                    arenaFrame:SetPoint("TOPLEFT", sArenaEnemyFrames, "TOPLEFT", 0, 0)
+                else
+                    arenaFrame:SetPoint("TOP", _G["ArenaEnemyFrame" .. i - 1], "BOTTOM", 0, (self.db.frameSpacing or 10) * -1)
+                end
             end
         end
     end
