@@ -116,15 +116,45 @@ for i = 1, MAX_ARENA_ENEMIES do
 end
 
 local function ProtectBar(bar, barTexture)
-    if not bar then return end
+    if not bar then
+        return
+    end
 
     bar:SetStatusBarTexture(barTexture)
-    
+
     local tex = bar:GetStatusBarTexture()
     if tex then
         if not tex.Hooked then
             tex:SetTexCoord(0, 1, 0, 1)
-            tex.SetTexCoord = function() end 
+            tex.SetTexCoord = function()
+            end
+            tex.Hooked = true
+        else
+            tex:SetTexCoord(0, 1, 0, 1)
+        end
+    end
+end
+
+for i = 1, MAX_ARENA_ENEMIES do
+    local arenaFrame = _G["ArenaEnemyFrame" .. i]
+    local petFrame = arenaFrame.petFrame
+
+    petFrame:SetParent(arenaFrame)
+    petFrame:SetMovable(true)
+
+    addon:SetupDrag(module, true, petFrame)
+    addon:SetupDrag(module, true, petFrame.healthbar, petFrame)
+    addon:SetupDrag(module, true, petFrame.manabar, petFrame)
+end
+
+local function ProtectBar(bar, barTexture)
+    if not bar then return end
+    bar:SetStatusBarTexture(barTexture)
+    local tex = bar:GetStatusBarTexture()
+    if tex then
+        if not tex.Hooked then
+            tex:SetTexCoord(0, 1, 0, 1)
+            tex.SetTexCoord = function() end
             tex.Hooked = true
         else
             tex:SetTexCoord(0, 1, 0, 1)
@@ -133,70 +163,51 @@ local function ProtectBar(bar, barTexture)
 end
 
 function module:OnEvent(event, ...)
-    local maxWidth = (self.db.healthBarWidth)
-    local maxHeight = (self.db.healthBarHeight + self.db.powerBarHeight)
-
     if event == "UNIT_AURA" then
-        return;
+        return
     end
 
-    for i = 1, 3 do
+    for i = 1, MAX_ARENA_ENEMIES do
         local arenaFrame = _G["ArenaEnemyFrame" .. i]
-        local petFrame = arenaFrame.petFrame
+        local petFrame = arenaFrame and arenaFrame.petFrame
 
-        if event == "TEST_MODE" then
-            if addon.testMode and GetCVar("showArenaEnemyPets") == "1" then
-                petFrame.healthbar.lockColor = true
-                petFrame.healthbar:SetMinMaxValues(0, 100)
-                petFrame.healthbar:SetValue(100)
-                petFrame.healthbar:SetStatusBarColor(0, 1, 0)
-                petFrame.healthbar.forceHideText = false
+        if petFrame then
+            if event == "TEST_MODE" then
+                if addon.testMode and GetCVar("showArenaEnemyPets") == "1" then
+                    petFrame.healthbar.lockColor = true
+                    petFrame.healthbar:SetMinMaxValues(0, 100)
+                    petFrame.healthbar:SetValue(100)
+                    petFrame.healthbar:SetStatusBarColor(0, 1, 0)
+                    petFrame.healthbar.forceHideText = false
+                    petFrame:Show()
+                else
+                    petFrame.healthbar.lockColor = false
+                    petFrame:Hide()
+                end
 
-                petFrame:Show()
-            else
-                petFrame.healthbar.lockColor = false
-                petFrame:Hide()
-            end
+            elseif event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" then
+                petFrame:SetScale(self.db.scale)
+                ProtectBar(petFrame.healthbar, self.db.barTexture)
 
-        elseif event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" then
-            petFrame:ClearAllPoints()
-            petFrame:SetPoint("CENTER", self.db.x, self.db.y)
-            petFrame:SetScale(self.db.scale)
-
-            ProtectBar(petFrame.healthbar, self.db.barTexture)
-
-            -- Безопасно вызываем макет (в PLAYER_ENTERING_WORLD все текстуры игроков уже созданы)
-            if arenaFrame.texture then
-                local frameStylesModule = addon.modules["Frame Styles"] or addon.modules["Unit Frames"]
-                if frameStylesModule and frameStylesModule.db then
-                    local currentLayout = addon.layouts[frameStylesModule.db.frameStyle]
-                    if currentLayout and currentLayout.SetFrameStyle then
-                        currentLayout:SetFrameStyle(arenaFrame, frameStylesModule.db)
+                if arenaFrame.texture then
+                    local frameStylesModule = addon.modules["Frame Styles"] or addon.modules["Unit Frames"]
+                    if frameStylesModule and frameStylesModule.db then
+                        local currentLayout = addon.layouts[frameStylesModule.db.frameStyle]
+                        if currentLayout and currentLayout.SetFrameStyle then
+                            currentLayout:SetFrameStyle(arenaFrame, frameStylesModule.db)
+                        end
                     end
                 end
             end
 
-            for j = 1, MAX_ARENA_ENEMIES do
-                local currentPetFrame = _G["ArenaEnemyFrame" .. j].petFrame
-                if j > 1 then
-                    local prevPetFrame = _G["ArenaEnemyFrame" .. (j - 1)].petFrame
-                    currentPetFrame:ClearAllPoints()
-                    currentPetFrame:SetPoint("TOP", prevPetFrame, "BOTTOM", 0, self.db.frameSpacing * -1)
+             if event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" or event == "TEST_MODE" then
+                if not petFrame.isMoving then
+                    petFrame:ClearAllPoints()
+                    
+                    local offsetY = self.db.y - ((i - 1) * self.db.frameSpacing)
+                    
+                     petFrame:SetPoint("CENTER", arenaFrame, "CENTER", self.db.x, offsetY)
                 end
-            end
-        end
-    end
-
-    if event == "ADDON_LOADED" then
-        -- При первичной загрузке настраиваем только базовые привязки, чтобы не ломать цепочку
-        for i = 1, MAX_ARENA_ENEMIES do
-            local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            local petFrame = arenaFrame and arenaFrame.petFrame
-            if petFrame then
-                petFrame:ClearAllPoints()
-                petFrame:SetPoint("CENTER", self.db.x, self.db.y)
-                petFrame:SetScale(self.db.scale)
-                ProtectBar(petFrame.healthbar, self.db.barTexture)
             end
         end
     end

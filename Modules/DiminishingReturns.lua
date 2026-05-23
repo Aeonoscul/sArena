@@ -48,14 +48,21 @@ module.optionsTable = {
 }
 
 local drCategories = {
-	"Stun",
 	"Incapacitate",
-	"Silence",
+	"Stun",
+	"RandomStun",
 	"Fear",
-	"Horror",
 	"Root",
+	"RandomRoot",
 	"Disarm",
+	"Silence",
+	"Horror",
+	"OpenerStun",
+	"Scatter",
 	"Cyclone",
+	"MindControl",
+	"Charge",
+	"Counterattack",
 }
 
 local drTime = 18
@@ -197,11 +204,6 @@ drList = {
 	[19306] = "Counterattack", 	-- Counterattack
 }
 
-local GetTime = GetTime
-local select = select
-local UnitGUID = UnitGUID
-local CooldownFrame_SetTimer = CooldownFrame_SetTimer
-
 local function CreateCustomBorder(frame)
 	local border = CreateFrame("Frame", nil, frame)
 	border:SetAllPoints(frame)
@@ -246,8 +248,8 @@ end
 
 local function UpdateDRPositions(drHandler)
 	local prevFrame = drHandler
-	local spacing = module.db.spacing or 3
-	local dir = module.db.growthDirection or "LEFT"
+	local spacing = module.db and module.db.spacing or 3
+	local dir = module.db and module.db.growthDirection or "LEFT"
 
 	local point, relativePoint, mult
 	if dir == "LEFT" then
@@ -268,38 +270,6 @@ local function UpdateDRPositions(drHandler)
 	end
 end
 
-local function DR_COMBAT_LOG_EVENT_UNFILTERED(drHandler, ...)
-	if not module.db.enable then return end
-	local _, event, _, sourceName, _, destGUID, destName, _, spellId, spellName = select(1, ...)
-
-	if UnitGUID(drHandler.unit) ~= destGUID then return end
-	
-	local category = drList[spellId]
-	if not category then return end
-
-	local frame = drHandler[category]
-	if not frame then return end
-
-	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" then
-		local _, _, texture = GetSpellInfo(spellId)
-		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
-		
-		if frame.CustomBorder then
-			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
-			frame.CustomBorder:Show()
-		end
-
-		frame:Show()
-		frame.time = tonumber(drTime)
-		frame.starttime = GetTime()
-		CooldownFrame_SetTimer(frame.cooldown, GetTime(), drTime, 1)
-
-		frame.severity = math.min(frame.severity + 1, 3)
-		
-		UpdateDRPositions(drHandler)
-	end
-end
-
 local function ResetDR(drHandler)
 	for i = 1, #drCategories do
 		local cat = drCategories[i]
@@ -307,7 +277,7 @@ local function ResetDR(drHandler)
 		if frame then
 			frame.time = 0
 			frame.starttime = 0
-			frame.cooldown:SetCooldown(0, 0)
+			frame.cooldown:Hide()
 			frame.severity = 1
 			if frame.CustomBorder then frame.CustomBorder:Hide() end
 			frame:Hide()
@@ -315,76 +285,151 @@ local function ResetDR(drHandler)
 	end
 end
 
+local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
+	if module.db and not module.db.enable then return end
+	
+	-- Распаковка для 3.3.5
+	local _, event, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName = ...
+
+	-- Проверка таргета
+	if UnitGUID(self.unit) ~= destGUID then return end
+	
+	local category = drList[spellId]
+	if not category then return end
+
+	local frame = self[category]
+	if not frame then return end
+
+	if event == "SPELL_AURA_APPLIED" then
+		frame.cooldown:Hide()
+		frame:Hide()
+		frame.severity = math.min(frame.severity + 1, 3)
+		UpdateDRPositions(self)
+
+	elseif event == "SPELL_AURA_REMOVED" then
+		local _, _, texture = GetSpellInfo(spellId)
+		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+		
+		if frame.CustomBorder and severityColor and severityColor[frame.severity] then
+			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
+			frame.CustomBorder:Show()
+		end
+
+		frame:Show()
+		frame.time = tonumber(drTime) or 18
+		frame.starttime = GetTime()
+		
+		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
+		UpdateDRPositions(self)
+
+	elseif event == "SPELL_AURA_REFRESH" then
+		local _, _, texture = GetSpellInfo(spellId)
+		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+		
+		if frame.CustomBorder and severityColor and severityColor[frame.severity] then
+			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
+			frame.CustomBorder:Show()
+		end
+
+		frame:Show()
+		frame.time = tonumber(drTime) or 18
+		frame.starttime = GetTime()
+		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
+
+		frame.severity = math.min(frame.severity + 1, 3)
+		UpdateDRPositions(self)
+	end
+end
+
+-- Вынесенная функция создания DR-обработчика для одного фрейма арены
+local function CreateDRHandler(arenaFrame, index)
+	local drHandler = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
+	drHandler.unit = "arena"..index
+	drHandler.severity = 1
+	drHandler.time = 0
+	drHandler.starttime = 0
+	drHandler.CustomBorder = CreateCustomBorder and CreateCustomBorder(drHandler) or nil
+	drHandler.cooldown:ClearAllPoints()
+	drHandler.cooldown:SetPoint("TOPLEFT", 1, -1)
+	drHandler.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+	drHandler.cooldown:Hide()
+	drHandler:Show()
+	drHandler.Icon:SetTexture(nil)
+	if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
+
+	for c = 1, #drCategories do
+		local cat = drCategories[c]
+		local f = CreateFrame("Frame", nil, drHandler, "sArenaIconTemplate")
+		f:Hide()
+		f.severity = 1
+		f.time = 0
+		f.starttime = 0
+		f.CustomBorder = CreateCustomBorder and CreateCustomBorder(f) or nil
+		
+		f.cooldown:ClearAllPoints()
+		f.cooldown:SetPoint("TOPLEFT", 1, -1)
+		f.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+		
+		f:SetScript("OnUpdate", function(self, elapsed)
+			if addon.testMode then return end
+			
+			if self.starttime and self.time and self.time > 0 then
+				if GetTime() >= (self.starttime + self.time) then
+					self.time = 0
+					self.starttime = 0
+					self.severity = 1
+					self:Hide()
+					if self.CustomBorder then self.CustomBorder:Hide() end
+					UpdateDRPositions(self:GetParent())
+				end
+			end
+		end)
+
+		drHandler[cat] = f
+	end
+
+	drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
+	drHandler:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	
+	-- Безопасный вызов (защита от ошибок nil)
+	drHandler:SetScript("OnEvent", function(self, event, ...) 
+		if self[event] then 
+			return self[event](self, ...) 
+		end 
+	end)
+	
+	arenaFrame.sArenaDRHandler = drHandler
+	return drHandler
+end
+
 function module:OnEvent(event, ...)
-	for i = 1, MAX_ARENA_ENEMIES do
+	for i = 1, (MAX_ARENA_ENEMIES or 5) do
 		local arenaFrame = _G["ArenaEnemyFrame"..i]
 		if not arenaFrame then break end
 
 		local drHandler = arenaFrame.sArenaDRHandler
 		
+		-- Создаём DR-обработчик, если его ещё нет (при ADDON_LOADED или PLAYER_ENTERING_WORLD)
 		if not drHandler then
-			drHandler = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
-			drHandler.unit = "arena"..i
-			drHandler.severity = 1
-			drHandler.time = 0
-			drHandler.starttime = 0
-			drHandler.CustomBorder = CreateCustomBorder(drHandler)
-			
-			drHandler.cooldown:ClearAllPoints()
-			drHandler.cooldown:SetPoint("TOPLEFT", 1, -1)
-			drHandler.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
-			drHandler.cooldown:Hide()
-			drHandler:Hide()
-
-			for c = 1, #drCategories do
-				local cat = drCategories[c]
-				local f = CreateFrame("Frame", nil, drHandler, "sArenaIconTemplate")
-				f:Hide()
-				f.severity = 1
-				f.time = 0
-				f.starttime = 0
-				f.CustomBorder = CreateCustomBorder(f)
-				
-				f.cooldown:ClearAllPoints()
-				f.cooldown:SetPoint("TOPLEFT", 1, -1)
-				f.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
-				
-				f.cooldown:SetScript("OnHide", function(self)
-					if addon.testMode then return end
-					local parentFrame = self:GetParent()
-					parentFrame.severity = 1
-					parentFrame:Hide()
-					UpdateDRPositions(parentFrame:GetParent())
-				end)
-
-				drHandler[cat] = f
-			end
-
-			drHandler:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-			drHandler:SetScript("OnEvent", function(self, event, ...) 
-				return DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...) 
-			end)
-			
-			arenaFrame.sArenaDRHandler = drHandler
-		else
-			drHandler = arenaFrame.sArenaDRHandler
+			drHandler = CreateDRHandler(arenaFrame, i)
 		end
 
 		if event == "ADDON_LOADED" then
 			drHandler:SetMovable(true)
-			addon:SetupDrag(self, true, drHandler)
+			if addon.SetupDrag then 
+				addon:SetupDrag(self, true, drHandler)
+			 end
 			drHandler:SetFrameLevel(7)
 		
 		elseif event == "TEST_MODE" then
-			if addon.testMode and self.db.enable then
+			if addon.testMode and (not module.db or module.db.enable) then
 				drHandler:EnableMouse(true)
 				drHandler.Icon:SetTexture("Interface\\Icons\\Spell_Nature_Invisibilty")
 				drHandler.severity = 1
-				if drHandler.CustomBorder then
+				if drHandler.CustomBorder and severityColor and severityColor[1] then
 					drHandler.CustomBorder:SetVertexColor(unpack(severityColor[1]))
 					drHandler.CustomBorder:Show()
 				end
-				drHandler:Show()
 
 				local testSpells = { 118, 15487 }
 				ResetDR(drHandler)
@@ -399,7 +444,7 @@ function module:OnEvent(event, ...)
 						f.Icon:SetTexture(texture)
 						f.severity = c + 1
 						
-						if f.CustomBorder then 
+						if f.CustomBorder and severityColor and severityColor[c + 1] then 
 							f.CustomBorder:SetVertexColor(unpack(severityColor[c + 1])) 
 							f.CustomBorder:Show()
 						end
@@ -413,31 +458,32 @@ function module:OnEvent(event, ...)
 				UpdateDRPositions(drHandler)
 			else
 				drHandler:EnableMouse(false)
-				drHandler:Hide()
+				drHandler.Icon:SetTexture(nil)
 				if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
 				ResetDR(drHandler)
 			end
 
 		elseif event == "UPDATE_SETTINGS" then
-			if not self.db.enable then
+			if module.db and not module.db.enable then
 				drHandler:EnableMouse(false)
-				drHandler:Hide()
 				ResetDR(drHandler)
 			else
 				drHandler:ClearAllPoints()
-				drHandler:SetPoint("CENTER", arenaFrame, "CENTER", self.db.x, self.db.y)
-				drHandler:SetSize(self.db.size, self.db.size)
+				if module.db then
+					drHandler:SetPoint("CENTER", arenaFrame, "CENTER", module.db.x, module.db.y)
+					drHandler:SetSize(module.db.size, module.db.size)
+				end
 				
 				for c = 1, #drCategories do
 					local cat = drCategories[c]
-					if drHandler[cat] then
-						drHandler[cat]:SetSize(self.db.size, self.db.size)
+					if drHandler[cat] and module.db then
+						drHandler[cat]:SetSize(module.db.size, module.db.size)
 					end
 				end
+				
 				if addon.testMode then
-					drHandler:Show()
 					drHandler.Icon:SetTexture("Interface\\Icons\\Spell_Nature_Invisibilty")
-					if drHandler.CustomBorder then
+					if drHandler.CustomBorder and severityColor and severityColor[1] then
 						drHandler.CustomBorder:SetVertexColor(unpack(severityColor[1]))
 						drHandler.CustomBorder:Show()
 					end
