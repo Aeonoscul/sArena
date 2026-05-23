@@ -1,17 +1,5 @@
-# sArena for 3.3.5 version (backported from WoD) fork fix
+# sArena for 3.3.5 version (backported from WoD)
+fork: https://github.com/Qblolz/sArena-wotlk-classic/tree/main
 fix pet
 fix df ui
-#### Advanced settings
-* now ArenaEnemyCastBar can be moveable
-* now ArenaEnemyCastBar can be set size or width
-* now can be set padding between arena frames
-
-#### Install
-##### After download from github - rename folder into "sArena"
-
-#### demo
-1. ![Demo 1](https://i.imgur.com/TuUC1ms.png)
-2. ![Demo 2](https://i.imgur.com/QC3B0mJ.png)
-
-###### support me
-* https://streamlabs.com/qbjw/tip
+<img width="728" height="320" alt="image" src="https://github.com/user-attachments/assets/23e2959c-2b05-41ac-8adf-4a9ceac72405" />
