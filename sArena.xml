@@ -56,4 +56,5 @@
 	<Script file="Modules\castbars.lua"/>
 	<Script file="Modules\trinkets.lua"/>
 	<Script file="Modules\racials.lua"/>
+	<Script file="Modules\diminishingreturns.lua"/>
 </Ui>

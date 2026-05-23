@@ -140,8 +140,6 @@ function module:OnEvent(event, ...)
             
             -- Применяем объединенную защиту ко всем полосам игрока
             ProtectBar(arenaFrame.healthbar, self.db.barTexture)
-            ProtectBar(arenaFrame.manabar, self.db.barTexture)
-            ProtectBar(arenaFrame.CastingBar, self.db.barTexture)
 
             local font, _, flags = arenaFrame.healthbar.TextString:GetFont()
 

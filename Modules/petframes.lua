@@ -164,7 +164,6 @@ function module:OnEvent(event, ...)
             petFrame:SetScale(self.db.scale)
 
             ProtectBar(petFrame.healthbar, self.db.barTexture)
-            ProtectBar(petFrame.manabar, self.db.barTexture)
 
             -- Безопасно вызываем макет (в PLAYER_ENTERING_WORLD все текстуры игроков уже созданы)
             if arenaFrame.texture then
@@ -198,7 +197,6 @@ function module:OnEvent(event, ...)
                 petFrame:SetPoint("CENTER", self.db.x, self.db.y)
                 petFrame:SetScale(self.db.scale)
                 ProtectBar(petFrame.healthbar, self.db.barTexture)
-                ProtectBar(petFrame.manabar, self.db.barTexture)
             end
         end
     end
