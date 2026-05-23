@@ -197,11 +197,6 @@ drList = {
 	[19306] = "Counterattack", 	-- Counterattack
 }
 
-local GetTime = GetTime
-local select = select
-local UnitGUID = UnitGUID
-local CooldownFrame_SetTimer = CooldownFrame_SetTimer
-
 local function CreateCustomBorder(frame)
 	local border = CreateFrame("Frame", nil, frame)
 	border:SetAllPoints(frame)
@@ -268,19 +263,40 @@ local function UpdateDRPositions(drHandler)
 	end
 end
 
-local function DR_COMBAT_LOG_EVENT_UNFILTERED(drHandler, ...)
-	if not module.db.enable then return end
-	local _, event, _, sourceName, _, destGUID, destName, _, spellId, spellName = select(1, ...)
+local function ResetDR(drHandler)
+	for i = 1, #drCategories do
+		local cat = drCategories[i]
+		local frame = drHandler[cat]
+		if frame then
+			frame.time = 0
+			frame.starttime = 0
+			frame.cooldown:Hide()
+			frame.severity = 1
+			if frame.CustomBorder then frame.CustomBorder:Hide() end
+			frame:Hide()
+		end
+	end
+end
 
-	if UnitGUID(drHandler.unit) ~= destGUID then return end
+local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
+	if not module.db.enable then return end
+	
+	local _, event, sourceGUID, sourceName, sourceFlags, destGUID, destName, destFlags, spellId, spellName = select(1, ...)
+
+	if UnitGUID(self.unit) ~= destGUID then return end
 	
 	local category = drList[spellId]
 	if not category then return end
 
-	local frame = drHandler[category]
+	local frame = self[category]
 	if not frame then return end
 
-	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" then
+	if event == "SPELL_AURA_APPLIED" then
+		frame.cooldown:Hide()
+		frame:Hide()
+		frame.severity = math.min(frame.severity + 1, 3)
+
+	elseif event == "SPELL_AURA_REMOVED" then
 		local _, _, texture = GetSpellInfo(spellId)
 		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
 		
@@ -290,28 +306,30 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(drHandler, ...)
 		end
 
 		frame:Show()
-		frame.time = tonumber(drTime)
+		frame.time = tonumber(drTime) or 18
 		frame.starttime = GetTime()
-		CooldownFrame_SetTimer(frame.cooldown, GetTime(), drTime, 1)
+		
+		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
+		
+		UpdateDRPositions(self)
+
+	elseif event == "SPELL_AURA_REFRESH" then
+		local _, _, texture = GetSpellInfo(spellId)
+		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+		
+		if frame.CustomBorder then
+			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
+			frame.CustomBorder:Show()
+		end
+
+		frame:Show()
+		frame.time = tonumber(drTime) or 18
+		frame.starttime = GetTime()
+		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
 
 		frame.severity = math.min(frame.severity + 1, 3)
 		
-		UpdateDRPositions(drHandler)
-	end
-end
-
-local function ResetDR(drHandler)
-	for i = 1, #drCategories do
-		local cat = drCategories[i]
-		local frame = drHandler[cat]
-		if frame then
-			frame.time = 0
-			frame.starttime = 0
-			frame.cooldown:SetCooldown(0, 0)
-			frame.severity = 1
-			if frame.CustomBorder then frame.CustomBorder:Hide() end
-			frame:Hide()
-		end
+		UpdateDRPositions(self)
 	end
 end
 
@@ -349,26 +367,34 @@ function module:OnEvent(event, ...)
 				f.cooldown:SetPoint("TOPLEFT", 1, -1)
 				f.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
 				
-				f.cooldown:SetScript("OnHide", function(self)
+				f:SetScript("OnUpdate", function(self, elapsed)
 					if addon.testMode then return end
-					local parentFrame = self:GetParent()
-					parentFrame.severity = 1
-					parentFrame:Hide()
-					UpdateDRPositions(parentFrame:GetParent())
+					
+					if self.starttime and self.time and self.time > 0 then
+						if GetTime() >= (self.starttime + self.time) then
+							self.time = 0
+							self.starttime = 0
+							self.severity = 1
+							self:Hide()
+							if self.CustomBorder then self.CustomBorder:Hide() end
+							UpdateDRPositions(self:GetParent())
+						end
+					end
 				end)
 
 				drHandler[cat] = f
 			end
 
 			drHandler:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-			drHandler:SetScript("OnEvent", function(self, event, ...) 
-				return DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...) 
-			end)
+			drHandler:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
 			
 			arenaFrame.sArenaDRHandler = drHandler
 		else
 			drHandler = arenaFrame.sArenaDRHandler
 		end
+
+		-- Привязываем функцию обработки к ключу события внутри фрейма
+		drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
 
 		if event == "ADDON_LOADED" then
 			drHandler:SetMovable(true)
