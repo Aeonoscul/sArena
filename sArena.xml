@@ -46,7 +46,7 @@
 	
 	<!-- Layouts -->
 	<Script file="Layouts\Blizzard.lua"/>
-	<Script file="Layouts\Xaryu.lua"/>
+	<Script file="Layouts\Aeonoscul.lua"/>
 	<Script file="Layouts\Flat.lua"/>
 
 	<!-- Modules -->

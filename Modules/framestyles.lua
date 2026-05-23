@@ -10,8 +10,8 @@ module.defaultSettings = {
     height = 32,
     healthBarHeight = 18,
     powerBarHeight = 8,
-    healthBarFontSize = 12,
-    powerBarFontSize = 12
+    healthBarFontSize = 8,
+    powerBarFontSize = 8
 }
 
 module.optionsTable = {
@@ -98,6 +98,36 @@ local UnitClass = UnitClass
 local unpack = unpack
 local CLASS_ICON_TCOORDS = CLASS_ICON_TCOORDS
 
+-- Выносим общую функцию защиты полос наверх
+local function ProtectBar(bar, barTexture)
+    if not bar then return end
+
+    -- 1. Ставим твою текстуру
+    bar:SetStatusBarTexture(barTexture)
+    
+    -- 2. Убиваем близовскую нарезку координат
+    local tex = bar:GetStatusBarTexture()
+    if tex then
+        if not tex.Hooked then
+            tex:SetTexCoord(0, 1, 0, 1)
+            tex.SetTexCoord = function() end 
+            tex.Hooked = true
+        else
+            tex:SetTexCoord(0, 1, 0, 1)
+        end
+    end
+
+    -- 3. Убиваем попытки игры сменить саму текстуру
+    if not bar.Hooked then
+        hooksecurefunc(bar, "SetStatusBarTexture", function(self, texture)
+            if texture ~= barTexture then
+                self:SetStatusBarTexture(barTexture)
+            end
+        end)
+        bar.Hooked = true
+    end
+end
+
 function module:OnEvent(event, ...)
     if event == "UNIT_AURA" then
         return;
@@ -114,13 +144,14 @@ function module:OnEvent(event, ...)
         elseif event == "UPDATE_SETTINGS" then
             local _layout = addon.layouts[self.db.frameStyle]
 
-            arenaFrame.healthbar:SetStatusBarTexture(self.db.barTexture)
-            arenaFrame.manabar:SetStatusBarTexture(self.db.barTexture)
-            arenaFrame.CastingBar:SetStatusBarTexture(self.db.barTexture)
-
             if _layout then
                 _layout:SetFrameStyle(arenaFrame, self.db)
             end
+            
+            -- Применяем объединенную защиту ко всем полосам игрока
+            ProtectBar(arenaFrame.healthbar, self.db.barTexture)
+            ProtectBar(arenaFrame.manabar, self.db.barTexture)
+            ProtectBar(arenaFrame.CastingBar, self.db.barTexture)
 
             local font, _, flags = arenaFrame.healthbar.TextString:GetFont()
 
@@ -149,6 +180,7 @@ function module:OnEvent(event, ...)
         self:OnEvent("UPDATE_SETTINGS")
     end
 end
+
 
 for i = 1, MAX_ARENA_ENEMIES do
     local arenaFrame = _G["ArenaEnemyFrame" .. i]

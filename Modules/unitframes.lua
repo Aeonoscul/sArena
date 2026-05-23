@@ -100,7 +100,6 @@ function module:OnEvent(event, ...)
             local arenaFrame = _G["ArenaEnemyFrame" .. i]
             if arenaFrame then
                 if addon.testMode then
-                    -- Сначала подготавливаем дефолт от близзард, чтобы он не затирал наши цвета
                     ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
 
                     arenaFrame.healthbar.lockColor = true
@@ -119,6 +118,17 @@ function module:OnEvent(event, ...)
                     arenaFrame.healthbar:SetStatusBarColor(r, g, b)
                     arenaFrame.healthbar.forceHideText = false
                     
+                    if arenaFrame.classPortrait then
+                        arenaFrame.classPortrait:SetTexture("Interface/TargetingFrame/UI-Classes-Circles")
+                        local coords = CLASS_ICON_TCOORDS[randomClass]
+                        if coords then
+                            arenaFrame.classPortrait:SetTexCoord(unpack(coords))
+                        else
+                            arenaFrame.classPortrait:SetTexCoord(0, 1, 0, 1)
+                        end
+                        arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
+                    end
+
                     arenaFrame.manabar:SetMinMaxValues(0, 100)
                     arenaFrame.manabar:SetValue(100)
                     arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
@@ -129,6 +139,9 @@ function module:OnEvent(event, ...)
                 else
                     arenaFrame.healthbar.lockColor = false
                     arenaFrame.manabar.lockColor = false
+                    if arenaFrame.classPortrait then
+                        arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
+                    end
                     arenaFrame:Hide()
                 end
             end
@@ -155,7 +168,6 @@ function module:OnEvent(event, ...)
     end
 end
 
--- Class colored health bars
 local healthBars = {
     ArenaEnemyFrame1HealthBar = 1,
     ArenaEnemyFrame2HealthBar = 1,

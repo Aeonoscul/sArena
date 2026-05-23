@@ -4,13 +4,13 @@ local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
     x = -40,
-    y = -42,
+    y = -37,
     scale = 0.7,
     healthBarWidth = 50,
     healthBarHeight = 14,
     powerBarHeight = 8,
     barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
-    frameSpacing = 45
+    frameSpacing = 25
 }
 
 module.optionsTable = {
@@ -115,6 +115,36 @@ for i = 1, MAX_ARENA_ENEMIES do
     addon:SetupDrag(module, true, petFrame.manabar, petFrame)
 end
 
+-- Выносим общую функцию защиты полос наверх, чтобы не плодить код
+local function ProtectBar(bar, barTexture)
+    if not bar then return end
+
+    -- 1. Ставим твою текстуру
+    bar:SetStatusBarTexture(barTexture)
+    
+    -- 2. Убиваем близовскую нарезку координат
+    local tex = bar:GetStatusBarTexture()
+    if tex then
+        if not tex.Hooked then
+            tex:SetTexCoord(0, 1, 0, 1)
+            tex.SetTexCoord = function() end 
+            tex.Hooked = true
+        else
+            tex:SetTexCoord(0, 1, 0, 1)
+        end
+    end
+
+    -- 3. Убиваем попытки игры сменить саму текстуру
+    if not bar.Hooked then
+        hooksecurefunc(bar, "SetStatusBarTexture", function(self, texture)
+            if texture ~= barTexture then
+                self:SetStatusBarTexture(barTexture)
+            end
+        end)
+        bar.Hooked = true
+    end
+end
+
 function module:OnEvent(event, ...)
     local maxWidth = (self.db.healthBarWidth)
     local maxHeight = (self.db.healthBarHeight + self.db.powerBarHeight)
@@ -146,10 +176,9 @@ function module:OnEvent(event, ...)
             petFrame:SetPoint("CENTER", self.db.x, self.db.y)
             petFrame:SetScale(self.db.scale)
 
-            petFrame.healthbar:SetStatusBarTexture(self.db.barTexture)
-            if petFrame.manabar then
-                petFrame.manabar:SetStatusBarTexture(self.db.barTexture)
-            end
+            -- Защищаем полосы здоровья и маны пета в один проход
+            ProtectBar(petFrame.healthbar, self.db.barTexture)
+            ProtectBar(petFrame.manabar, self.db.barTexture)
 
             for j = 1, MAX_ARENA_ENEMIES do
                 local currentPetFrame = _G["ArenaEnemyFrame" .. j].petFrame
