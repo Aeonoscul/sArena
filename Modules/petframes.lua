@@ -115,14 +115,11 @@ for i = 1, MAX_ARENA_ENEMIES do
     addon:SetupDrag(module, true, petFrame.manabar, petFrame)
 end
 
--- Выносим общую функцию защиты полос наверх, чтобы не плодить код
 local function ProtectBar(bar, barTexture)
     if not bar then return end
 
-    -- 1. Ставим твою текстуру
     bar:SetStatusBarTexture(barTexture)
     
-    -- 2. Убиваем близовскую нарезку координат
     local tex = bar:GetStatusBarTexture()
     if tex then
         if not tex.Hooked then
@@ -132,16 +129,6 @@ local function ProtectBar(bar, barTexture)
         else
             tex:SetTexCoord(0, 1, 0, 1)
         end
-    end
-
-    -- 3. Убиваем попытки игры сменить саму текстуру
-    if not bar.Hooked then
-        hooksecurefunc(bar, "SetStatusBarTexture", function(self, texture)
-            if texture ~= barTexture then
-                self:SetStatusBarTexture(barTexture)
-            end
-        end)
-        bar.Hooked = true
     end
 end
 
@@ -171,14 +158,24 @@ function module:OnEvent(event, ...)
                 petFrame:Hide()
             end
 
-        elseif event == "UPDATE_SETTINGS" then
+        elseif event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" then
             petFrame:ClearAllPoints()
             petFrame:SetPoint("CENTER", self.db.x, self.db.y)
             petFrame:SetScale(self.db.scale)
 
-            -- Защищаем полосы здоровья и маны пета в один проход
             ProtectBar(petFrame.healthbar, self.db.barTexture)
             ProtectBar(petFrame.manabar, self.db.barTexture)
+
+            -- Безопасно вызываем макет (в PLAYER_ENTERING_WORLD все текстуры игроков уже созданы)
+            if arenaFrame.texture then
+                local frameStylesModule = addon.modules["Frame Styles"] or addon.modules["Unit Frames"]
+                if frameStylesModule and frameStylesModule.db then
+                    local currentLayout = addon.layouts[frameStylesModule.db.frameStyle]
+                    if currentLayout and currentLayout.SetFrameStyle then
+                        currentLayout:SetFrameStyle(arenaFrame, frameStylesModule.db)
+                    end
+                end
+            end
 
             for j = 1, MAX_ARENA_ENEMIES do
                 local currentPetFrame = _G["ArenaEnemyFrame" .. j].petFrame
@@ -192,6 +189,17 @@ function module:OnEvent(event, ...)
     end
 
     if event == "ADDON_LOADED" then
-        self:OnEvent("UPDATE_SETTINGS")
+        -- При первичной загрузке настраиваем только базовые привязки, чтобы не ломать цепочку
+        for i = 1, MAX_ARENA_ENEMIES do
+            local arenaFrame = _G["ArenaEnemyFrame" .. i]
+            local petFrame = arenaFrame and arenaFrame.petFrame
+            if petFrame then
+                petFrame:ClearAllPoints()
+                petFrame:SetPoint("CENTER", self.db.x, self.db.y)
+                petFrame:SetScale(self.db.scale)
+                ProtectBar(petFrame.healthbar, self.db.barTexture)
+                ProtectBar(petFrame.manabar, self.db.barTexture)
+            end
+        end
     end
 end

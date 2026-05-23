@@ -116,16 +116,6 @@ local function ProtectBar(bar, barTexture)
             tex:SetTexCoord(0, 1, 0, 1)
         end
     end
-
-    -- 3. Убиваем попытки игры сменить саму текстуру
-    if not bar.Hooked then
-        hooksecurefunc(bar, "SetStatusBarTexture", function(self, texture)
-            if texture ~= barTexture then
-                self:SetStatusBarTexture(barTexture)
-            end
-        end)
-        bar.Hooked = true
-    end
 end
 
 function module:OnEvent(event, ...)
