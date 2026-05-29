@@ -414,6 +414,9 @@ function module:OnEvent(event, ...)
 			drHandler = CreateDRHandler(arenaFrame, i)
 		end
 
+		-- Привязываем функцию обработки к ключу события внутри фрейма
+		drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
+
 		if event == "ADDON_LOADED" then
 			drHandler:SetMovable(true)
 			if addon.SetupDrag then 
