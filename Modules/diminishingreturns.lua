@@ -355,6 +355,13 @@ local function CreateDRHandler(arenaFrame, index)
 	drHandler.cooldown:Hide()
 	drHandler:Show()
 	drHandler.Icon:SetTexture(nil)
+	-- Сдвигаем иконку внутрь, чтобы не было рамок внутри самой иконки
+	drHandler.Icon:SetPoint("TOPLEFT", 2, -2)
+	drHandler.Icon:SetPoint("BOTTOMRIGHT", -2, 2)
+	if drHandler.texture then
+		drHandler.texture:SetPoint("TOPLEFT", 2, -2)
+		drHandler.texture:SetPoint("BOTTOMRIGHT", -2, 2)
+	end
 	if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
 
 	for c = 1, #drCategories do
@@ -369,6 +376,14 @@ local function CreateDRHandler(arenaFrame, index)
 		f.cooldown:ClearAllPoints()
 		f.cooldown:SetPoint("TOPLEFT", 1, -1)
 		f.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+		
+		-- Сдвигаем иконку внутрь, чтобы не было рамок внутри самой иконки
+		f.Icon:SetPoint("TOPLEFT", 2, -2)
+		f.Icon:SetPoint("BOTTOMRIGHT", -2, 2)
+		if f.texture then
+			f.texture:SetPoint("TOPLEFT", 2, -2)
+			f.texture:SetPoint("BOTTOMRIGHT", -2, 2)
+		end
 		
 		f:SetScript("OnUpdate", function(self, elapsed)
 			if addon.testMode then return end
@@ -413,6 +428,9 @@ function module:OnEvent(event, ...)
 		if not drHandler then
 			drHandler = CreateDRHandler(arenaFrame, i)
 		end
+
+		-- Привязываем функцию обработки к ключу события внутри фрейма
+		drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
 
 		if event == "ADDON_LOADED" then
 			drHandler:SetMovable(true)
