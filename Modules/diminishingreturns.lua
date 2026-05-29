@@ -48,21 +48,21 @@ module.optionsTable = {
 }
 
 local drCategories = {
-	"Incapacitate",
-	"Stun",
-	"RandomStun",
-	"Fear",
-	"Root",
-	"RandomRoot",
-	"Disarm",
-	"Silence",
-	"Horror",
-	"OpenerStun",
-	"Scatter",
-	"Cyclone",
-	"MindControl",
-	"Charge",
-	"Counterattack",
+	"incapacitate",
+	"stun",
+	"random_stun",
+	"fear",
+	"root",
+	"random_root",
+	"disarm",
+	"silence",
+	"horror",
+	"opener_stun",
+	"scatter",
+	"cyclone",
+	"mind_control",
+	"charge",
+	"counterattack",
 }
 
 local drTime = 18
@@ -74,164 +74,279 @@ local severityColor = {
 }
 
 drList = {
-	[49203] = "Incapacitate", 	-- Hungering Cold
-	[2637]  = "Incapacitate", 	-- Hibernate
-	[3355]  = "Incapacitate", 	-- Freezing Trap Effect
-	[19386] = "Incapacitate", 	-- Wyvern Sting
-	[118]   = "Incapacitate", 	-- Polymorph
-	[28271] = "Incapacitate", 	-- Polymorph: Turtle
-	[28272] = "Incapacitate", 	-- Polymorph: Pig
-	[61721] = "Incapacitate", 	-- Polymorph: Rabbit
-	[61780] = "Incapacitate", 	-- Polymorph: Turkey
-	[61305] = "Incapacitate", 	-- Polymorph: Black Cat
-	[20066] = "Incapacitate", 	-- Repentance
-	[1776]  = "Incapacitate", 	-- Gouge
-	[6770]  = "Incapacitate", 	-- Sap
-	[710]   = "Incapacitate", 	-- Banish
-	[9484]  = "Incapacitate", 	-- Shackle Undead
-	[51514] = "Incapacitate", 	-- Hex
-	[13327] = "Incapacitate", 	-- Reckless Charge (Rocket Helmet)
-	[4064]  = "Incapacitate", 	-- Rough Copper Bomb
-	[4065]  = "Incapacitate", 	-- Large Copper Bomb
-	[4066]  = "Incapacitate", 	-- Small Bronze Bomb
-	[4067]  = "Incapacitate", 	-- Big Bronze Bomb
-	[4068]  = "Incapacitate", 	-- Iron Grenade
-	[12421] = "Incapacitate", 	-- Mithril Frag Bomb
-	[4069]  = "Incapacitate", 	-- Big Iron Bomb
-	[12562] = "Incapacitate", 	-- The Big One
-	[12543] = "Incapacitate", 	-- Hi-Explosive Bomb
-	[19769] = "Incapacitate", 	-- Thorium Grenade
-	[19784] = "Incapacitate", 	-- Dark Iron Bomb
-	[30216] = "Incapacitate", 	-- Fel Iron Bomb
-	[30461] = "Incapacitate", 	-- The Bigger One
-	[30217] = "Incapacitate", 	-- Adamantite Grenade
+	[49203] = "incapacitate", -- Hungering Cold
+	[2637]  = "incapacitate", -- Hibernate (Rank 1)
+	[18657] = "incapacitate", -- Hibernate (Rank 2)
+	[18658] = "incapacitate", -- Hibernate (Rank 3)
+	[60210] = "incapacitate", -- Freezing Arrow Effect (Rank 1)
+	[3355]  = "incapacitate", -- Freezing Trap Effect (Rank 1)
+	[14308] = "incapacitate", -- Freezing Trap Effect (Rank 2)
+	[14309] = "incapacitate", -- Freezing Trap Effect (Rank 3)
+	[19386] = "incapacitate", -- Wyvern Sting (Rank 1)
+	[24132] = "incapacitate", -- Wyvern Sting (Rank 2)
+	[24133] = "incapacitate", -- Wyvern Sting (Rank 3)
+	[27068] = "incapacitate", -- Wyvern Sting (Rank 4)
+	[49011] = "incapacitate", -- Wyvern Sting (Rank 5)
+	[49012] = "incapacitate", -- Wyvern Sting (Rank 6)
+	[118]   = "incapacitate", -- Polymorph (Rank 1)
+	[12824] = "incapacitate", -- Polymorph (Rank 2)
+	[12825] = "incapacitate", -- Polymorph (Rank 3)
+	[12826] = "incapacitate", -- Polymorph (Rank 4)
+	[28271] = "incapacitate", -- Polymorph: Turtle
+	[28272] = "incapacitate", -- Polymorph: Pig
+	[61721] = "incapacitate", -- Polymorph: Rabbit
+	[61780] = "incapacitate", -- Polymorph: Turkey
+	[61305] = "incapacitate", -- Polymorph: Black Cat
+	[20066] = "incapacitate", -- Repentance
+	[1776]  = "incapacitate", -- Gouge
+	[6770]  = "incapacitate", -- Sap (Rank 1)
+	[2070]  = "incapacitate", -- Sap (Rank 2)
+	[11297] = "incapacitate", -- Sap (Rank 3)
+	[51724] = "incapacitate", -- Sap (Rank 4)
+	[710]   = "incapacitate", -- Banish (Rank 1)
+	[18647] = "incapacitate", -- Banish (Rank 2)
+	[9484]  = "incapacitate", -- Shackle Undead (Rank 1)
+	[9485]  = "incapacitate", -- Shackle Undead (Rank 2)
+	[10955] = "incapacitate", -- Shackle Undead (Rank 3)
+	[51514] = "incapacitate", -- Hex
+	[13327] = "incapacitate", -- Reckless Charge (Rocket Helmet)
+	[4064]  = "incapacitate", -- Rough Copper Bomb
+	[4065]  = "incapacitate", -- Large Copper Bomb
+	[4066]  = "incapacitate", -- Small Bronze Bomb
+	[4067]  = "incapacitate", -- Big Bronze Bomb
+	[4068]  = "incapacitate", -- Iron Grenade
+	[12421] = "incapacitate", -- Mithril Frag Bomb
+	[4069]  = "incapacitate", -- Big Iron Bomb
+	[12562] = "incapacitate", -- The Big One
+	[12543] = "incapacitate", -- Hi-Explosive Bomb
+	[19769] = "incapacitate", -- Thorium Grenade
+	[19784] = "incapacitate", -- Dark Iron Bomb
+	[30216] = "incapacitate", -- Fel Iron Bomb
+	[30461] = "incapacitate", -- The Bigger One
+	[30217] = "incapacitate", -- Adamantite Grenade
+	[67769] = "incapacitate", -- Cobalt Frag Bomb
+	[67890] = "incapacitate", -- Cobalt Frag Bomb (Frag Belt)
+	[54466] = "incapacitate", -- Saronite Grenade
 
-	[47481] = "Stun",      -- Gnaw (Ghoul Pet)
-	[5211]  = "Stun",      -- Bash
-	[22570] = "Stun",      -- Maim
-	[24394] = "Stun",      -- Intimidation
-	[50519] = "Stun",      -- Sonic Blast
-	[50518] = "Stun",      -- Ravage
-	[44572] = "Stun",      -- Deep Freeze
-	[853]   = "Stun",      -- Hammer of Justice
-	[2812]  = "Stun",      -- Holy Wrath
-	[408]   = "Stun",      -- Kidney Shot
-	[1833]  = "Stun", 	   -- Cheap Shot
-	[58861] = "Stun",      -- Bash (Spirit Wolves)
-	[30283] = "Stun",      -- Shadowfury
-	[12809] = "Stun",      -- Concussion Blow
-	[60995] = "Stun",      -- Demon Charge
-	[30153] = "Stun",      -- Pursuit
-	[20253] = "Stun",      -- Intercept Stun
-	[46968] = "Stun",      -- Shockwave
-	[20549] = "Stun",      -- War Stomp (Racial)
-	[85388] = "Stun",      -- Throwdown
-	[90337] = "Stun",      -- Bad Manner (Hunter Pet Stun)
-	[91800] = "Stun",	   -- Gnaw (DK Pet Stun)
+	[47481] = "stun", -- Gnaw (Ghoul Pet)
+	[5211]  = "stun", -- Bash (Rank 1)
+	[6798]  = "stun", -- Bash (Rank 2)
+	[8983]  = "stun", -- Bash (Rank 3)
+	[22570] = "stun", -- Maim (Rank 1)
+	[49802] = "stun", -- Maim (Rank 2)
+	[24394] = "stun", -- Intimidation
+	[50519] = "stun", -- Sonic Blast (Pet Rank 1)
+	[53564] = "stun", -- Sonic Blast (Pet Rank 2)
+	[53565] = "stun", -- Sonic Blast (Pet Rank 3)
+	[53566] = "stun", -- Sonic Blast (Pet Rank 4)
+	[53567] = "stun", -- Sonic Blast (Pet Rank 5)
+	[53568] = "stun", -- Sonic Blast (Pet Rank 6)
+	[50518] = "stun", -- Ravage (Pet Rank 1)
+	[53558] = "stun", -- Ravage (Pet Rank 2)
+	[53559] = "stun", -- Ravage (Pet Rank 3)
+	[53560] = "stun", -- Ravage (Pet Rank 4)
+	[53561] = "stun", -- Ravage (Pet Rank 5)
+	[53562] = "stun", -- Ravage (Pet Rank 6)
+	[44572] = "stun", -- Deep Freeze
+	[853]   = "stun", -- Hammer of Justice (Rank 1)
+	[5588]  = "stun", -- Hammer of Justice (Rank 2)
+	[5589]  = "stun", -- Hammer of Justice (Rank 3)
+	[10308] = "stun", -- Hammer of Justice (Rank 4)
+	[2812]  = "stun", -- Holy Wrath (Rank 1)
+	[10318] = "stun", -- Holy Wrath (Rank 2)
+	[27139] = "stun", -- Holy Wrath (Rank 3)
+	[48816] = "stun", -- Holy Wrath (Rank 4)
+	[48817] = "stun", -- Holy Wrath (Rank 5)
+	[408]   = "stun", -- Kidney Shot (Rank 1)
+	[8643]  = "stun", -- Kidney Shot (Rank 2)
+	[58861] = "stun", -- Bash (Spirit Wolves)
+	[30283] = "stun", -- Shadowfury (Rank 1)
+	[30413] = "stun", -- Shadowfury (Rank 2)
+	[30414] = "stun", -- Shadowfury (Rank 3)
+	[47846] = "stun", -- Shadowfury (Rank 4)
+	[47847] = "stun", -- Shadowfury (Rank 5)
+	[12809] = "stun", -- Concussion Blow
+	[60995] = "stun", -- Demon Charge
+	[30153] = "stun", -- Intercept (Felguard Rank 1)
+	[30195] = "stun", -- Intercept (Felguard Rank 2)
+	[30197] = "stun", -- Intercept (Felguard Rank 3)
+	[47995] = "stun", -- Intercept (Felguard Rank 4)
+	[20253] = "stun", -- Intercept Stun (Rank 1)
+	[20614] = "stun", -- Intercept Stun (Rank 2)
+	[20615] = "stun", -- Intercept Stun (Rank 3)
+	[25273] = "stun", -- Intercept Stun (Rank 4)
+	[25274] = "stun", -- Intercept Stun (Rank 5)
+	[46968] = "stun", -- Shockwave
+	[20549] = "stun", -- War Stomp (Racial)
+	[375039] = "stun",
+	[374994] = "stun",
+	[375010] = "stun",
 
-	[16922] = "RandomStun", 	-- Celestial Focus (Starfire Stun)
-	[28445] = "RandomStun", 	-- Improved Concussive Shot
-	[12355] = "RandomStun", 	-- Impact
-	[20170] = "RandomStun", 	-- Seal of Justice Stun
-	[39796] = "RandomStun", 	-- Stoneclaw Stun
-	[12798] = "RandomStun", 	-- Revenge Stun
-	[5530]  = "RandomStun", 	-- Mace Stun Effect (Mace Specialization)
-	[15283] = "RandomStun", 	-- Stunning Blow (Weapon Proc)
-	[56]    = "RandomStun", 	-- Stun (Weapon Proc)
-	[34510] = "RandomStun", 	-- Stormherald/Deep Thunder (Weapon Proc)
+	[16922]   = "random_stun",  -- Celestial Focus (Starfire Stun)
+	[28445]   = "random_stun",  -- Improved Concussive Shot
+	[12355]   = "random_stun",  -- Impact
+	[20170]   = "random_stun",  -- Seal of Justice Stun
+	[39796]   = "random_stun",  -- Stoneclaw Stun
+	[12798]   = "random_stun",  -- Revenge Stun
+	[5530]    = "random_stun",  -- Mace Stun Effect (Mace Specialization)
+	[15283]   = "random_stun",  -- Stunning Blow (Weapon Proc)
+	[56]      = "random_stun",  -- Stun (Weapon Proc)
+	[34510]   = "random_stun",  -- Stormherald/Deep Thunder (Weapon Proc)
 
-	[1513]  = "Fear",      -- Scare Beast
-	[10326] = "Fear",      -- Turn Evil
-	[8122]  = "Fear",      -- Psychic Scream
-	[2094]  = "Fear",      -- Blind
-	[5782]  = "Fear",      -- Fear
-	[6358]  = "Fear",      -- Seduction (Succubus)
-	[5484]  = "Fear",      -- Howl of Terror
-	[5246]  = "Fear",      -- Intimidating Shout
-	[5134]  = "Fear",      -- Flash Bomb Fear (Item)
+	[1513]  = "fear", -- Scare Beast (Rank 1)
+	[14326] = "fear", -- Scare Beast (Rank 2)
+	[14327] = "fear", -- Scare Beast (Rank 3)
+	[10326] = "fear", -- Turn Evil
+	[8122]  = "fear", -- Psychic Scream (Rank 1)
+	[8124]  = "fear", -- Psychic Scream (Rank 2)
+	[10888] = "fear", -- Psychic Scream (Rank 3)
+	[10890] = "fear", -- Psychic Scream (Rank 4)
+	[2094]  = "fear", -- Blind
+	[5782]  = "fear", -- Fear (Rank 1)
+	[6213]  = "fear", -- Fear (Rank 2)
+	[6215]  = "fear", -- Fear (Rank 3)
+	[6358]  = "fear", -- Seduction (Succubus)
+	[5484]  = "fear", -- Howl of Terror (Rank 1)
+	[17928] = "fear", -- Howl of Terror (Rank 2)
+	[5246]  = "fear", -- Intimidating Shout
+	[5134]  = "fear", -- Flash Bomb Fear (Item)
 
-	[339]   = "Root",      -- Entangling Roots
-	[19975] = "Root",      -- Nature's Grasp
-	[50245] = "Root",      -- Pin
-	[33395] = "Root",      -- Freeze (Water Elemental)
-	[122]   = "Root",      -- Frost Nova
-	[39965] = "Root",      -- Frost Grenade (Item)
-	[63685] = "Root",      -- Freeze (Frost Shock)
+	[339]   = "root", -- Entangling Roots (Rank 1)
+	[1062]  = "root", -- Entangling Roots (Rank 2)
+	[5195]  = "root", -- Entangling Roots (Rank 3)
+	[5196]  = "root", -- Entangling Roots (Rank 4)
+	[9852]  = "root", -- Entangling Roots (Rank 5)
+	[9853]  = "root", -- Entangling Roots (Rank 6)
+	[26989] = "root", -- Entangling Roots (Rank 7)
+	[53308] = "root", -- Entangling Roots (Rank 8)
+	[19975] = "root", -- Nature's Grasp (Rank 1)
+	[19974] = "root", -- Nature's Grasp (Rank 2)
+	[19973] = "root", -- Nature's Grasp (Rank 3)
+	[19972] = "root", -- Nature's Grasp (Rank 4)
+	[19971] = "root", -- Nature's Grasp (Rank 5)
+	[19970] = "root", -- Nature's Grasp (Rank 6)
+	[27010] = "root", -- Nature's Grasp (Rank 7)
+	[53312] = "root", -- Nature's Grasp (Rank 8)
+	[50245] = "root", -- Pin (Rank 1)
+	[53544] = "root", -- Pin (Rank 2)
+	[53545] = "root", -- Pin (Rank 3)
+	[53546] = "root", -- Pin (Rank 4)
+	[53547] = "root", -- Pin (Rank 5)
+	[53548] = "root", -- Pin (Rank 6)
+	[33395] = "root", -- Freeze (Water Elemental)
+	[122]   = "root", -- Frost Nova (Rank 1)
+	[865]   = "root", -- Frost Nova (Rank 2)
+	[6131]  = "root", -- Frost Nova (Rank 3)
+	[10230] = "root", -- Frost Nova (Rank 4)
+	[27088] = "root", -- Frost Nova (Rank 5)
+	[42917] = "root", -- Frost Nova (Rank 6)
+	[39965] = "root", -- Frost Grenade (Item)
+	[63685] = "root", -- Freeze (Frost Shock)
+	[55536] = "root", -- Frostweave Net (Item)
 
-	[12494] = "RandomRoot", -- Frostbite
-	[55080] = "RandomRoot", -- Shattered Barrier
-	[58373] = "RandomRoot", -- Glyph of Hamstring
-	[23694] = "RandomRoot", -- Improved Hamstring
-	[47168] = "RandomRoot", -- Improved Wing Clip
-	[19185] = "RandomRoot", -- Entrapment
+	[12494] = "random_root",         -- Frostbite
+	[55080] = "random_root",         -- Shattered Barrier
+	[58373] = "random_root",         -- Glyph of Hamstring
+	[23694] = "random_root",         -- Improved Hamstring
+	[47168] = "random_root",         -- Improved Wing Clip
+	[19185] = "random_root",         -- Entrapment
 
-	[53359] = "Disarm",    -- Chimera Shot (Scorpid)
-	[50541] = "Disarm",    -- Clench
-	[64058] = "Disarm",    -- Psychic Horror Disarm Effect
-	[51722] = "Disarm",    -- Dismantle
-	[676]   = "Disarm",    -- Disarm
+	[53359] = "disarm", -- Chimera Shot (Scorpid)
+	[50541] = "disarm", -- Snatch (Rank 1)
+	[53537] = "disarm", -- Snatch (Rank 2)
+	[53538] = "disarm", -- Snatch (Rank 3)
+	[53540] = "disarm", -- Snatch (Rank 4)
+	[53542] = "disarm", -- Snatch (Rank 5)
+	[53543] = "disarm", -- Snatch (Rank 6)
+	[64346] = "disarm", -- Fiery Payback
+	[64058] = "disarm", -- Psychic Horror Disarm Effect
+	[51722] = "disarm", -- Dismantle
+	[676]   = "disarm", -- Disarm
 
-	[47476] = "Silence",   -- Strangulate
-	[34490] = "Silence",   -- Silencing Shot
-	[35334] = "Silence",   -- Nether Shock (Rank 1)
-	[44957] = "Silence",   -- Nether Shock (Rank 2)
-	[18469] = "Silence",   -- Silenced - Improved Counterspell (Rank 1)
-	[55021] = "Silence",   -- Silenced - Improved Counterspell (Rank 2)
-	[15487] = "Silence",   -- Silence
-	[1330]  = "Silence",   -- Garrote - Silence
-	[18425] = "Silence",   -- Silenced - Improved Kick
-	[24259] = "Silence",   -- Spell Lock
-	[43523] = "Silence",   -- Unstable Affliction 1
-	[31117] = "Silence",   -- Unstable Affliction 2
-	[18498] = "Silence",   -- Silenced - Gag Order (Shield Slam)
-	[50613] = "Silence",   -- Arcane Torrent (Racial, Runic Power)
-	[28730] = "Silence",   -- Arcane Torrent (Racial, Mana)
-	[25046] = "Silence",   -- Arcane Torrent (Racial, Energy)
+	[47476] = "silence", -- Strangulate
+	[34490] = "silence", -- Silencing Shot
+	[35334] = "silence", -- Nether Shock 1
+	[44957] = "silence", -- Nether Shock 2
+	[18469] = "silence", -- Silenced - Improved Counterspell (Rank 1)
+	[55021] = "silence", -- Silenced - Improved Counterspell (Rank 2)
+	[63529] = "silence", -- Silenced - Shield of the Templar
+	[15487] = "silence", -- Silence
+	[1330]  = "silence", -- Garrote - Silence
+	[18425] = "silence", -- Silenced - Improved Kick
+	[24259] = "silence", -- Spell Lock
+	[43523] = "silence", -- Unstable Affliction 1
+	[31117] = "silence", -- Unstable Affliction 2
+	[18498] = "silence", -- Silenced - Gag Order (Shield Slam)
+	[74347] = "silence", -- Silenced - Gag Order (Heroic Throw?)
+	[50613] = "silence", -- Arcane Torrent (Racial, Runic Power)
+	[28730] = "silence", -- Arcane Torrent (Racial, Mana)
+	[25046] = "silence", -- Arcane Torrent (Racial, Energy)
+	[375001] = "silence", -- Arcane Torrent
 
-	[64044] = "Horror",    -- Psychic Horror
-	[6789]  = "Horror",    -- Death Coil
+	[64044] = "horror", -- Psychic Horror
+	[6789]  = "horror", -- Death Coil (Rank 1)
+	[17925] = "horror", -- Death Coil (Rank 2)
+	[17926] = "horror", -- Death Coil (Rank 3)
+	[27223] = "horror", -- Death Coil (Rank 4)
+	[47859] = "horror", -- Death Coil (Rank 5)
+	[47860] = "horror", -- Death Coil (Rank 6)
 
-	[9005]  = "OpenerStun", -- Pounce
+	[1833]  = "opener_stun", -- Cheap Shot
+	[9005]  = "opener_stun", -- Pounce (Rank 1)
+	[9823]  = "opener_stun", -- Pounce (Rank 2)
+	[9827]  = "opener_stun", -- Pounce (Rank 3)
+	[27006] = "opener_stun", -- Pounce (Rank 4)
+	[49803] = "opener_stun", -- Pounce (Rank 5)
 
-	[31661] = "Scatter",   -- Dragon's Breath
-	[19503] = "Scatter",   -- Scatter Shot
+	[31661] = "scatter", -- Dragon's Breath (Rank 1)
+	[33041] = "scatter", -- Dragon's Breath (Rank 2)
+	[33042] = "scatter", -- Dragon's Breath (Rank 3)
+	[33043] = "scatter", -- Dragon's Breath (Rank 4)
+	[42949] = "scatter", -- Dragon's Breath (Rank 5)
+	[42950] = "scatter", -- Dragon's Breath (Rank 6)
+	[19503] = "scatter", -- Scatter Shot
 
-	-- Spells that DR with itself only
-	[33786] = "Cyclone",    	-- Cyclone
-	[605]   = "MindControl", 	-- Mind Control
-	[13181] = "MindControl", 	-- Gnomish Mind Control Cap
-	[7922]  = "Charge",     	-- Charge Stun
-	[19306] = "Counterattack", 	-- Counterattack
+	[33786] = "cyclone",        -- Cyclone
+	[605]   = "mind_control",   -- Mind Control
+	[13181] = "mind_control",   -- Gnomish Mind Control Cap
+	[67799] = "mind_control",   -- Mind Amplification Dish
+	[7922]  = "charge",         -- Charge Stun
+	[19306] = "counterattack",  -- Counterattack 1
+	[20909] = "counterattack",  -- Counterattack 2
+	[20910] = "counterattack",  -- Counterattack 3
+	[27067] = "counterattack",  -- Counterattack 4
+	[48998] = "counterattack",  -- Counterattack 5
+	[48999] = "counterattack",  -- Counterattack 6
 }
 
 local function CreateCustomBorder(frame)
 	local border = CreateFrame("Frame", nil, frame)
 	border:SetAllPoints(frame)
-	border:SetFrameLevel(frame:GetFrameLevel() + 2)
+	border:SetFrameLevel(frame:GetFrameLevel() + 1)
 
 	local t = border:CreateTexture(nil, "OVERLAY")
 	t:SetTexture(1, 1, 1, 1)
 	t:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
 	t:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
-	t:SetHeight(1)
+	t:SetHeight(2)
 
 	local b = border:CreateTexture(nil, "OVERLAY")
 	b:SetTexture(1, 1, 1, 1)
 	b:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
 	b:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	b:SetHeight(1)
+	b:SetHeight(2)
 
 	local l = border:CreateTexture(nil, "OVERLAY")
 	l:SetTexture(1, 1, 1, 1)
 	l:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
 	l:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	l:SetWidth(1)
+	l:SetWidth(2)
 
 	local r = border:CreateTexture(nil, "OVERLAY")
 	r:SetTexture(1, 1, 1, 1)
 	r:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
 	r:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	r:SetWidth(1)
+	r:SetWidth(2)
 
 	border.SetVertexColor = function(self, r_val, g, b_val, a)
 		t:SetVertexColor(r_val, g, b_val, a)
@@ -247,26 +362,30 @@ local function CreateCustomBorder(frame)
 end
 
 local function UpdateDRPositions(drHandler)
-	local prevFrame = drHandler
 	local spacing = module.db and module.db.spacing or 3
 	local dir = module.db and module.db.growthDirection or "LEFT"
 
-	local point, relativePoint, mult
-	if dir == "LEFT" then
-		point, relativePoint, mult = "RIGHT", "LEFT", -1
-	else
-		point, relativePoint, mult = "LEFT", "RIGHT", 1
-	end
-
+	local visibleFrames = {}
 	for i = 1, #drCategories do
 		local cat = drCategories[i]
 		local frame = drHandler[cat]
-		
 		if frame and frame:IsShown() then
-			frame:ClearAllPoints()
-			frame:SetPoint(point, prevFrame, relativePoint, spacing * mult, 0)
-			prevFrame = frame
+			table.insert(visibleFrames, frame)
 		end
+	end
+
+	if #visibleFrames == 0 then return end
+
+	local prevFrame = drHandler
+	for i = 1, #visibleFrames do
+		local frame = visibleFrames[i]
+		frame:ClearAllPoints()
+		if dir == "LEFT" then
+			frame:SetPoint("RIGHT", prevFrame, "LEFT", -spacing, 0)
+		else
+			frame:SetPoint("LEFT", prevFrame, "RIGHT", spacing, 0)
+		end
+		prevFrame = frame
 	end
 end
 
@@ -288,11 +407,9 @@ end
 local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 	if module.db and not module.db.enable then return end
 	
-	-- Распаковка для 3.3.5
 	local _, event, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName = ...
 
-	-- Проверка таргета
-	if UnitGUID(self.unit) ~= destGUID then return end
+	if not destGUID or UnitGUID(self.unit) ~= destGUID then return end
 	
 	local category = drList[spellId]
 	if not category then return end
@@ -310,7 +427,7 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 		local _, _, texture = GetSpellInfo(spellId)
 		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
 		
-		if frame.CustomBorder and severityColor and severityColor[frame.severity] then
+		if frame.CustomBorder and severityColor[frame.severity] then
 			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
 			frame.CustomBorder:Show()
 		end
@@ -326,7 +443,7 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 		local _, _, texture = GetSpellInfo(spellId)
 		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
 		
-		if frame.CustomBorder and severityColor and severityColor[frame.severity] then
+		if frame.CustomBorder and severityColor[frame.severity] then
 			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
 			frame.CustomBorder:Show()
 		end
@@ -341,26 +458,27 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 	end
 end
 
--- Вынесенная функция создания DR-обработчика для одного фрейма арены
+local function SetIconZoomed(texture)
+	if not texture then return end
+	texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+end
+
 local function CreateDRHandler(arenaFrame, index)
 	local drHandler = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
 	drHandler.unit = "arena"..index
 	drHandler.severity = 1
 	drHandler.time = 0
 	drHandler.starttime = 0
-	drHandler.CustomBorder = CreateCustomBorder and CreateCustomBorder(drHandler) or nil
+	drHandler.CustomBorder = CreateCustomBorder(drHandler)
 	drHandler.cooldown:ClearAllPoints()
-	drHandler.cooldown:SetPoint("TOPLEFT", 1, -1)
-	drHandler.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+	drHandler.cooldown:SetAllPoints(drHandler)
 	drHandler.cooldown:Hide()
 	drHandler:Show()
 	drHandler.Icon:SetTexture(nil)
-	-- Сдвигаем иконку внутрь, чтобы не было рамок внутри самой иконки
-	drHandler.Icon:SetPoint("TOPLEFT", 2, -2)
-	drHandler.Icon:SetPoint("BOTTOMRIGHT", -2, 2)
+	drHandler.Icon:SetAllPoints(drHandler)
+	SetIconZoomed(drHandler.Icon)
 	if drHandler.texture then
-		drHandler.texture:SetPoint("TOPLEFT", 2, -2)
-		drHandler.texture:SetPoint("BOTTOMRIGHT", -2, 2)
+		drHandler.texture:SetAllPoints(drHandler)
 	end
 	if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
 
@@ -371,23 +489,18 @@ local function CreateDRHandler(arenaFrame, index)
 		f.severity = 1
 		f.time = 0
 		f.starttime = 0
-		f.CustomBorder = CreateCustomBorder and CreateCustomBorder(f) or nil
+		f.CustomBorder = CreateCustomBorder(f)
 		
 		f.cooldown:ClearAllPoints()
-		f.cooldown:SetPoint("TOPLEFT", 1, -1)
-		f.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+		f.cooldown:SetAllPoints(f)
 		
-		-- Сдвигаем иконку внутрь, чтобы не было рамок внутри самой иконки
-		f.Icon:SetPoint("TOPLEFT", 2, -2)
-		f.Icon:SetPoint("BOTTOMRIGHT", -2, 2)
+		f.Icon:SetAllPoints(f)
+		SetIconZoomed(f.Icon)
 		if f.texture then
-			f.texture:SetPoint("TOPLEFT", 2, -2)
-			f.texture:SetPoint("BOTTOMRIGHT", -2, 2)
+			f.texture:SetAllPoints(f)
 		end
 		
 		f:SetScript("OnUpdate", function(self, elapsed)
-			if addon.testMode then return end
-			
 			if self.starttime and self.time and self.time > 0 then
 				if GetTime() >= (self.starttime + self.time) then
 					self.time = 0
@@ -406,7 +519,6 @@ local function CreateDRHandler(arenaFrame, index)
 	drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
 	drHandler:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	
-	-- Безопасный вызов (защита от ошибок nil)
 	drHandler:SetScript("OnEvent", function(self, event, ...) 
 		if self[event] then 
 			return self[event](self, ...) 
@@ -424,66 +536,71 @@ function module:OnEvent(event, ...)
 
 		local drHandler = arenaFrame.sArenaDRHandler
 		
-		-- Создаём DR-обработчик, если его ещё нет (при ADDON_LOADED или PLAYER_ENTERING_WORLD)
 		if not drHandler then
 			drHandler = CreateDRHandler(arenaFrame, i)
 		end
 
-		-- Привязываем функцию обработки к ключу события внутри фрейма
-		drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
-
 		if event == "ADDON_LOADED" then
-			drHandler:SetMovable(true)
-			if addon.SetupDrag then 
-				addon:SetupDrag(self, true, drHandler)
-			 end
+			local firstCat = drHandler[drCategories[1]]
+			if firstCat then
+				firstCat:SetMovable(true)
+				if addon.SetupDrag then
+					addon:SetupDrag(self, true, firstCat, drHandler)
+				end
+			end
 			drHandler:SetFrameLevel(7)
 		
 		elseif event == "TEST_MODE" then
+			drHandler.Icon:SetTexture(nil)
+			if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
+			ResetDR(drHandler)
+
 			if addon.testMode and (not module.db or module.db.enable) then
-				drHandler:EnableMouse(true)
-				drHandler.Icon:SetTexture("Interface\\Icons\\Spell_Nature_Invisibilty")
-				drHandler.severity = 1
-				if drHandler.CustomBorder and severityColor and severityColor[1] then
-					drHandler.CustomBorder:SetVertexColor(unpack(severityColor[1]))
-					drHandler.CustomBorder:Show()
+				local categorySpells = {}
+				for spellId, cat in pairs(drList) do
+					if not categorySpells[cat] then
+						categorySpells[cat] = {}
+					end
+					table.insert(categorySpells[cat], spellId)
 				end
 
-				local testSpells = { 118, 15487 }
-				ResetDR(drHandler)
+				local numCategories = math.random(1, 5)
+				local shuffled = {}
+				for c = 1, #drCategories do
+					shuffled[c] = drCategories[c]
+				end
+				for c = #shuffled, 2, -1 do
+					local j = math.random(1, c)
+					shuffled[c], shuffled[j] = shuffled[j], shuffled[c]
+				end
 
-				for c = 1, 2 do
-					local cat = drCategories[c + 1]
+				for c = 1, numCategories do
+					local cat = shuffled[c]
 					local f = drHandler[cat]
-					if f then
-						f:EnableMouse(false)
+					if f and categorySpells[cat] and #categorySpells[cat] > 0 then
+						local randomSpellId = categorySpells[cat][math.random(1, #categorySpells[cat])]
+						local _, _, texture = GetSpellInfo(randomSpellId)
 						
-						local _, _, texture = GetSpellInfo(testSpells[c])
-						f.Icon:SetTexture(texture)
-						f.severity = c + 1
+						f.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+						f.severity = math.random(1, 3)
 						
-						if f.CustomBorder and severityColor and severityColor[c + 1] then 
-							f.CustomBorder:SetVertexColor(unpack(severityColor[c + 1])) 
+						if f.CustomBorder and severityColor[f.severity] then
+							f.CustomBorder:SetVertexColor(unpack(severityColor[f.severity]))
 							f.CustomBorder:Show()
 						end
 						
 						f:Show()
-						f.time = 60
+						local timer = math.random(15, 25)
+						f.time = timer
 						f.starttime = GetTime()
-						CooldownFrame_SetTimer(f.cooldown, GetTime(), 60, 1)
+						CooldownFrame_SetTimer(f.cooldown, GetTime(), timer, 1)
 					end
 				end
 				UpdateDRPositions(drHandler)
-			else
-				drHandler:EnableMouse(false)
-				drHandler.Icon:SetTexture(nil)
-				if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
-				ResetDR(drHandler)
 			end
 
 		elseif event == "UPDATE_SETTINGS" then
 			if module.db and not module.db.enable then
-				drHandler:EnableMouse(false)
 				ResetDR(drHandler)
 			else
 				drHandler:ClearAllPoints()
@@ -499,13 +616,6 @@ function module:OnEvent(event, ...)
 					end
 				end
 				
-				if addon.testMode then
-					drHandler.Icon:SetTexture("Interface\\Icons\\Spell_Nature_Invisibilty")
-					if drHandler.CustomBorder and severityColor and severityColor[1] then
-						drHandler.CustomBorder:SetVertexColor(unpack(severityColor[1]))
-						drHandler.CustomBorder:Show()
-					end
-				end
 				UpdateDRPositions(drHandler)
 			end
 
