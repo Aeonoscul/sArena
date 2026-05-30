@@ -64,7 +64,10 @@ function module:OnEvent(event, ...)
         local barSpark = _G[castBar:GetName() .. "Spark"]
         local barText = castBar.Text
         local barIcon = _G[castBar:GetName() .. "Icon"]
-        local textBorder = castBar.TextBorder
+        local textBorder
+        if castBar.TextBorder then
+            textBorder = castBar.TextBorder
+        end
 
         if event == "ADDON_LOADED" then
             castBar:SetMovable(true)
@@ -101,7 +104,7 @@ function module:OnEvent(event, ...)
             barText:SetDrawLayer("OVERLAY", 0)
             barText:ClearAllPoints()
             barText:SetPoint("CENTER", castBar, "CENTER", 0, 0)
-            if textBorder:Hide() then
+            if textBorder and textBorder:Hide() then
                 textBorder:Hide()
             end
         end
