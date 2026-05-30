@@ -77,9 +77,8 @@ function module:OnEvent(event, ...)
                 castBar.fadeOut = nil
                 castBar.flash = nil
                 barIcon:SetTexture(GetMacroIconInfo(math.random(1, GetNumMacroIcons())))
-                barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
+                --barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
                 barText:SetText(GetSpellInfo(118))
-                textBorder:Hide()
                 barSpark:SetPoint("CENTER", castBar, "LEFT", castBar:GetWidth() * 0.5, 0)
                 castBar:SetMinMaxValues(0, 100)
                 castBar:SetValue(50)
@@ -97,10 +96,14 @@ function module:OnEvent(event, ...)
             castBar:SetPoint("CENTER", self.db.x, self.db.y)
             castBar:SetScale(self.db.scale)
             castBar:SetSize(self.db.width, self.db.height)
-            barIcon:SetSize(self.db.height, self.db.height)
+            barIcon:SetSize(self.db.height*1.2, self.db.height*1.2)
             barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
-            barText:Hide()
-            textBorder:Hide()
+            barText:SetDrawLayer("OVERLAY", 0)
+            barText:ClearAllPoints()
+            barText:SetPoint("CENTER", castBar, "CENTER", 0, 0)
+            if textBorder:Hide() then
+                textBorder:Hide()
+            end
         end
     end
 
