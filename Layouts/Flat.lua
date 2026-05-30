@@ -36,13 +36,15 @@ function layout:SetFrameStyle(frame, db)
 
     if db.mirroredFrames then
         frame.healthbar:SetPoint("TOPLEFT")
-        frame.name:SetPoint("TOPLEFT", frame.healthbar, 0, 16)
+        frame.name:SetPoint("TOPRIGHT", frame.healthbar, -2, 16)
+        frame.name:SetJustifyH("RIGHT")
         frame.backgroundFrame:SetPoint("TOPLEFT", frame.healthbar, -2, 2)
-        frame.classPortrait:SetPoint("TOPLEFT", frame.healthbar, "TOPRIGHT", 2, -2)
+        frame.classPortrait:SetPoint("TOPLEFT", frame.healthbar, "TOPLEFT", 2, -2)
         frame.manabar:SetPoint("TOPLEFT", frame.healthbar, "BOTTOMLEFT", 0, -2)
     else
         frame.healthbar:SetPoint("TOPLEFT")
         frame.name:SetPoint("TOPLEFT", frame.healthbar, 0, 16)
+        frame.name:SetJustifyH("LEFT")
         frame.backgroundFrame:SetPoint("TOPLEFT", frame.healthbar, -2, 2)
         frame.classPortrait:SetPoint("TOPLEFT", frame.healthbar, "TOPRIGHT", 2, -2)
         frame.manabar:SetPoint("TOPLEFT", frame.healthbar, "BOTTOMLEFT", 0, -2)
