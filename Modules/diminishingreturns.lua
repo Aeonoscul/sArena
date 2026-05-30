@@ -68,9 +68,10 @@ local drCategories = {
 local drTime = 18
 
 local severityColor = {
-	[1] = { 0, 1, 0, 1 },
-	[2] = { 1, 1, 0, 1 },
-	[3] = { 1, 0, 0, 1 }
+	[1] = { 0, 1, 0, 1 },     -- 100% duration (hidden, green border)
+	[2] = { 1, 1, 0, 1 },     -- 50% duration (yellow)
+	[3] = { 1, 0.5, 0, 1 },   -- 25% duration (orange)
+	[4] = { 1, 0, 0, 1 },     -- Immune (red)
 }
 
 drList = {
@@ -420,7 +421,7 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 	if event == "SPELL_AURA_APPLIED" then
 		frame.cooldown:Hide()
 		frame:Hide()
-		frame.severity = math.min(frame.severity + 1, 3)
+		frame.severity = math.min(frame.severity + 1, 4)
 		UpdateDRPositions(self)
 
 	elseif event == "SPELL_AURA_REMOVED" then
@@ -453,7 +454,7 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 		frame.starttime = GetTime()
 		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
 
-		frame.severity = math.min(frame.severity + 1, 3)
+		frame.severity = math.min(frame.severity + 1, 4)
 		UpdateDRPositions(self)
 	end
 end
@@ -513,6 +514,12 @@ local function CreateDRHandler(arenaFrame, index)
 			end
 		end)
 
+		-- Attach drag to each child icon, moving the parent drHandler
+		f:SetMovable(true)
+		if addon.SetupDrag then
+			addon:SetupDrag(module, true, f, drHandler)
+		end
+
 		drHandler[cat] = f
 	end
 
@@ -541,13 +548,6 @@ function module:OnEvent(event, ...)
 		end
 
 		if event == "ADDON_LOADED" then
-			local firstCat = drHandler[drCategories[1]]
-			if firstCat then
-				firstCat:SetMovable(true)
-				if addon.SetupDrag then
-					addon:SetupDrag(self, true, firstCat, drHandler)
-				end
-			end
 			drHandler:SetFrameLevel(7)
 		
 		elseif event == "TEST_MODE" then
@@ -564,7 +564,7 @@ function module:OnEvent(event, ...)
 					table.insert(categorySpells[cat], spellId)
 				end
 
-				local numCategories = math.random(1, 5)
+				local numCategories = math.random(1, 3)
 				local shuffled = {}
 				for c = 1, #drCategories do
 					shuffled[c] = drCategories[c]
@@ -582,7 +582,7 @@ function module:OnEvent(event, ...)
 						local _, _, texture = GetSpellInfo(randomSpellId)
 						
 						f.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
-						f.severity = math.random(1, 3)
+						f.severity = math.random(2, 4)
 						
 						if f.CustomBorder and severityColor[f.severity] then
 							f.CustomBorder:SetVertexColor(unpack(severityColor[f.severity]))
