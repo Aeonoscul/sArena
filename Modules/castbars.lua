@@ -70,7 +70,7 @@ function module:OnEvent(event, ...)
             castBar:SetMovable(true)
             addon:SetupDrag(self, true, castBar)
 
-            castBar:SetFrameLevel(5)
+            castBar:SetFrameLevel(6)
         elseif event == "TEST_MODE" then
             if addon.testMode and self.db.enable then
                 castBar:EnableMouse(true)

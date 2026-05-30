@@ -283,7 +283,7 @@ function module:OnEvent(event, ...)
             CC:SetMovable(true)
             addon:SetupDrag(self, true, CC)
 
-            CC:SetFrameLevel(6)
+            CC:SetFrameLevel(5)
 
             CC.cooldown:ClearAllPoints()
             CC.cooldown:SetPoint("TOPLEFT", 1, -1)
