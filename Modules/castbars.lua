@@ -64,7 +64,9 @@ function module:OnEvent(event, ...)
         local barSpark = _G[castBar:GetName() .. "Spark"]
         local barText = castBar.Text
         local barIcon = _G[castBar:GetName() .. "Icon"]
-        local textBorder = castBar.TextBorder
+        if castBar.TextBorder then
+            local textBorder = castBar.TextBorder
+        end
 
         if event == "ADDON_LOADED" then
             castBar:SetMovable(true)
@@ -79,7 +81,9 @@ function module:OnEvent(event, ...)
                 barIcon:SetTexture(GetMacroIconInfo(math.random(1, GetNumMacroIcons())))
                 barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
                 barText:SetText(GetSpellInfo(118))
-                textBorder:Hide()
+                if textBorder then
+                    textBorder:Hide()
+                end
                 barSpark:SetPoint("CENTER", castBar, "LEFT", castBar:GetWidth() * 0.5, 0)
                 castBar:SetMinMaxValues(0, 100)
                 castBar:SetValue(50)
@@ -100,7 +104,9 @@ function module:OnEvent(event, ...)
             barIcon:SetSize(self.db.height, self.db.height)
             barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
             barText:Hide()
-            textBorder:Hide()
+            if textBorder then
+                textBorder:Hide()
+            end
         end
     end
 
