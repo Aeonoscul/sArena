@@ -3,11 +3,11 @@ local module = addon:CreateModule("Diminishing Returns")
 
 module.defaultSettings = {
 	enable = true,
-	x = -128,
-	y = -3,
+	x = 44,
+	y = -2,
 	size = 26,
 	spacing = 3,
-	growthDirection = "LEFT",
+	growthDirection = "RIGHT",
 }
 
 module.optionsTable = {

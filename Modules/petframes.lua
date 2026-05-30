@@ -3,15 +3,15 @@ local module = addon:CreateModule("Pet Frames")
 local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
-    x = -40,
-    y = -37,
+    x = -22,
+    y = -42,
     scale = 0.7,
     healthBarWidth = 50,
     healthBarHeight = 14,
     powerBarHeight = 8,
     barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
-    frameSpacing = 25
-}
+    frameSpacing = 0,
+    }
 
 module.optionsTable = {
     enable = {
@@ -102,38 +102,6 @@ sArenaEnemyFrames:Hide()
 sArenaEnemyFrames:SetMovable(true)
 
 ArenaEnemyFrames = dummyFrame
-
-for i = 1, MAX_ARENA_ENEMIES do
-    local arenaFrame = _G["ArenaEnemyFrame" .. i]
-    local petFrame = arenaFrame.petFrame
-
-    -- petFrame:SetParent(arenaFrame)
-    petFrame:SetMovable(true)
-
-    addon:SetupDrag(module, true, petFrame)
-    addon:SetupDrag(module, true, petFrame.healthbar, petFrame)
-    addon:SetupDrag(module, true, petFrame.manabar, petFrame)
-end
-
-local function ProtectBar(bar, barTexture)
-    if not bar then
-        return
-    end
-
-    bar:SetStatusBarTexture(barTexture)
-
-    local tex = bar:GetStatusBarTexture()
-    if tex then
-        if not tex.Hooked then
-            tex:SetTexCoord(0, 1, 0, 1)
-            tex.SetTexCoord = function()
-            end
-            tex.Hooked = true
-        else
-            tex:SetTexCoord(0, 1, 0, 1)
-        end
-    end
-end
 
 for i = 1, MAX_ARENA_ENEMIES do
     local arenaFrame = _G["ArenaEnemyFrame" .. i]
