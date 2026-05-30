@@ -3,15 +3,15 @@ local module = addon:CreateModule("Pet Frames")
 local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
-    x = -40,
-    y = -37,
+    x = -22,
+    y = -42,
     scale = 0.7,
     healthBarWidth = 50,
     healthBarHeight = 14,
     powerBarHeight = 8,
     barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
-    frameSpacing = 25
-}
+    frameSpacing = 0,
+    }
 
 module.optionsTable = {
     enable = {

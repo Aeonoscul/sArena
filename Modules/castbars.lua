@@ -3,8 +3,8 @@ local module = addon:CreateModule("Cast Bars")
 
 module.defaultSettings = {
     enable = true,
-    x = -128,
-    y = 0,
+    x = -130,
+    y = -1,
     scale = 1,
     width = 80,
     height = 12
