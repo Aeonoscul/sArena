@@ -64,7 +64,9 @@ function module:OnEvent(event, ...)
         local barSpark = _G[castBar:GetName() .. "Spark"]
         local barText = castBar.Text
         local barIcon = _G[castBar:GetName() .. "Icon"]
-        local textBorder = castBar.TextBorder
+        if castBar.TextBorder then
+            local textBorder = castBar.TextBorder
+        end
 
         if event == "ADDON_LOADED" then
             castBar:SetMovable(true)
