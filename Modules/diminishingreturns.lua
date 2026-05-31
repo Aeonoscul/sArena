@@ -48,21 +48,9 @@ module.optionsTable = {
 }
 
 local drCategories = {
-	"incapacitate",
-	"stun",
-	"random_stun",
-	"fear",
-	"root",
-	"random_root",
-	"disarm",
-	"silence",
-	"horror",
-	"opener_stun",
-	"scatter",
-	"cyclone",
-	"mind_control",
-	"charge",
-	"counterattack",
+	"incapacitate", "stun", "random_stun", "fear", "root",
+	"random_root", "disarm", "silence", "horror", "opener_stun",
+	"scatter", "cyclone", "mind_control", "charge", "counterattack",
 }
 
 local drTime = 18
@@ -320,47 +308,66 @@ drList = {
 	[48999] = "counterattack",  -- Counterattack 6
 }
 
+-- ---------------------------------------------------------------------------
+-- Border
+-- ---------------------------------------------------------------------------
+
 local function CreateCustomBorder(frame)
 	local border = CreateFrame("Frame", nil, frame)
 	border:SetAllPoints(frame)
 	border:SetFrameLevel(frame:GetFrameLevel() + 1)
 
-	local t = border:CreateTexture(nil, "OVERLAY")
-	t:SetTexture(1, 1, 1, 1)
-	t:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
-	t:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
-	t:SetHeight(2)
+	local top = border:CreateTexture(nil, "OVERLAY")
+	top:SetTexture(1, 1, 1, 1)
+	top:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
+	top:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
+	top:SetHeight(2)
 
-	local b = border:CreateTexture(nil, "OVERLAY")
-	b:SetTexture(1, 1, 1, 1)
-	b:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	b:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	b:SetHeight(2)
+	local bottom = border:CreateTexture(nil, "OVERLAY")
+	bottom:SetTexture(1, 1, 1, 1)
+	bottom:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
+	bottom:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
+	bottom:SetHeight(2)
 
-	local l = border:CreateTexture(nil, "OVERLAY")
-	l:SetTexture(1, 1, 1, 1)
-	l:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
-	l:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	l:SetWidth(2)
+	local left = border:CreateTexture(nil, "OVERLAY")
+	left:SetTexture(1, 1, 1, 1)
+	left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
+	left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
+	left:SetWidth(2)
 
-	local r = border:CreateTexture(nil, "OVERLAY")
-	r:SetTexture(1, 1, 1, 1)
-	r:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
-	r:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	r:SetWidth(2)
+	local right = border:CreateTexture(nil, "OVERLAY")
+	right:SetTexture(1, 1, 1, 1)
+	right:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
+	right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
+	right:SetWidth(2)
 
-	border.SetVertexColor = function(self, r_val, g, b_val, a)
-		t:SetVertexColor(r_val, g, b_val, a)
-		b:SetVertexColor(r_val, g, b_val, a)
-		l:SetVertexColor(r_val, g, b_val, a)
-		r:SetVertexColor(r_val, g, b_val, a)
+	function border.SetVertexColor(_, r, g, b, a)
+		top:SetVertexColor(r, g, b, a)
+		bottom:SetVertexColor(r, g, b, a)
+		left:SetVertexColor(r, g, b, a)
+		right:SetVertexColor(r, g, b, a)
 	end
 
-	border.Show = function(self) t:Show() b:Show() l:Show() r:Show() end
-	border.Hide = function(self) t:Hide() b:Hide() l:Hide() r:Hide() end
+	function border.Show(_)
+		top:Show()
+		bottom:Show()
+		left:Show()
+		right:Show()
+	end
+
+	function border.Hide(_)
+		top:Hide()
+		bottom:Hide()
+		left:Hide()
+		right:Hide()
+	end
 
 	return border
 end
+
+-- ---------------------------------------------------------------------------
+-- Positioning
+-- ---------------------------------------------------------------------------
 
 local function UpdateDRPositions(drHandler)
 	local spacing = module.db and module.db.spacing or 3
@@ -368,10 +375,9 @@ local function UpdateDRPositions(drHandler)
 
 	local visibleFrames = {}
 	for i = 1, #drCategories do
-		local cat = drCategories[i]
-		local frame = drHandler[cat]
+		local frame = drHandler[drCategories[i]]
 		if frame and frame:IsShown() then
-			table.insert(visibleFrames, frame)
+			visibleFrames[#visibleFrames + 1] = frame
 		end
 	end
 
@@ -390,28 +396,129 @@ local function UpdateDRPositions(drHandler)
 	end
 end
 
+-- ---------------------------------------------------------------------------
+-- Reset
+-- ---------------------------------------------------------------------------
+
 local function ResetDR(drHandler)
 	for i = 1, #drCategories do
-		local cat = drCategories[i]
-		local frame = drHandler[cat]
+		local frame = drHandler[drCategories[i]]
 		if frame then
 			frame.time = 0
 			frame.starttime = 0
-			frame.cooldown:Hide()
 			frame.severity = 1
+			if frame.timerText then
+				frame.timerText:SetText("")
+				frame.timerText:Hide()
+			end
 			if frame.CustomBorder then frame.CustomBorder:Hide() end
 			frame:Hide()
 		end
 	end
 end
 
-local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
-	if module.db and not module.db.enable then return end
-	
-	local _, event, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName = ...
+-- ---------------------------------------------------------------------------
+-- Icon helpers
+-- ---------------------------------------------------------------------------
 
+local function SetIconZoomed(texture)
+	if not texture then return end
+	texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+end
+
+local function UpdateDRFrameIcon(frame, spellId)
+	local _, _, texture = GetSpellInfo(spellId)
+	frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+
+	if frame.CustomBorder and severityColor[frame.severity] then
+		frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
+		frame.CustomBorder:Show()
+	end
+end
+
+local function StartDRTimer(frame)
+	frame:Show()
+	frame.time = tonumber(drTime) or 18
+	frame.starttime = GetTime()
+end
+
+-- ---------------------------------------------------------------------------
+-- Timer text & OnUpdate
+-- ---------------------------------------------------------------------------
+
+local function UpdateTimerFontSize(f)
+	if not f.timerText then return end
+	local size = module.db and module.db.size or 26
+	local fontSize = math.max(10, floor(size * 0.6))
+	local font, _, flags = f.timerText:GetFont()
+	f.timerText:SetFont(font, fontSize, flags)
+end
+
+local function SetupDRTimerText(f)
+	local timerText = f:CreateFontString(nil, "OVERLAY")
+	timerText:SetFont("Fonts\\FRIZQT__.TTF", math.max(10, floor((module.db and module.db.size or 26) * 0.6)), "OUTLINE")
+	timerText:SetPoint("CENTER", 0, 0)
+	timerText:SetText("")
+	f.timerText = timerText
+	f.lastDisplayed = -1
+end
+
+local function SetupDRTimerOnUpdate(f)
+	local throttle = 0
+	f:SetScript("OnUpdate", function(self, elapsed)
+		if not (self.starttime and self.time and self.time > 0) then return end
+
+		throttle = throttle + elapsed
+		if throttle < 0.1 then return end
+		throttle = 0
+
+		local remaining = self.starttime + self.time - GetTime()
+		if remaining > 0 then
+			local display = math.floor(remaining + 0.5)
+			if display ~= self.lastDisplayed then
+				self.timerText:SetText(display)
+				self.lastDisplayed = display
+				if severityColor[self.severity] then
+					self.timerText:SetTextColor(unpack(severityColor[self.severity]))
+				end
+			end
+			self.timerText:Show()
+		else
+			self.time = 0
+			self.starttime = 0
+			self.severity = 1
+			self.lastDisplayed = -1
+			self:Hide()
+			self.timerText:SetText("")
+			self.timerText:Hide()
+			if self.CustomBorder then self.CustomBorder:Hide() end
+			UpdateDRPositions(self:GetParent())
+		end
+	end)
+end
+
+-- ---------------------------------------------------------------------------
+-- Drag
+-- ---------------------------------------------------------------------------
+
+local function SetupDRDrag(f, drHandler)
+	f:SetMovable(true)
+	if addon.SetupDrag then
+		addon:SetupDrag(module, true, f, drHandler)
+	end
+end
+
+-- ---------------------------------------------------------------------------
+-- COMBAT_LOG_EVENT_UNFILTERED
+-- ---------------------------------------------------------------------------
+
+local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
+	if not module.db or not module.db.enable then return end
+
+	local _, event, _, _, _, destGUID = ...
 	if not destGUID or UnitGUID(self.unit) ~= destGUID then return end
-	
+
+	local _, _, _, _, _, _, _, _, spellId = ...
 	local category = drList[spellId]
 	if not category then return end
 
@@ -419,50 +526,26 @@ local function DR_COMBAT_LOG_EVENT_UNFILTERED(self, ...)
 	if not frame then return end
 
 	if event == "SPELL_AURA_APPLIED" then
-		frame.cooldown:Hide()
 		frame:Hide()
 		frame.severity = math.min(frame.severity + 1, 4)
 		UpdateDRPositions(self)
 
 	elseif event == "SPELL_AURA_REMOVED" then
-		local _, _, texture = GetSpellInfo(spellId)
-		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
-		
-		if frame.CustomBorder and severityColor[frame.severity] then
-			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
-			frame.CustomBorder:Show()
-		end
-
-		frame:Show()
-		frame.time = tonumber(drTime) or 18
-		frame.starttime = GetTime()
-		
-		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
+		UpdateDRFrameIcon(frame, spellId)
+		StartDRTimer(frame)
 		UpdateDRPositions(self)
 
 	elseif event == "SPELL_AURA_REFRESH" then
-		local _, _, texture = GetSpellInfo(spellId)
-		frame.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
-		
-		if frame.CustomBorder and severityColor[frame.severity] then
-			frame.CustomBorder:SetVertexColor(unpack(severityColor[frame.severity]))
-			frame.CustomBorder:Show()
-		end
-
-		frame:Show()
-		frame.time = tonumber(drTime) or 18
-		frame.starttime = GetTime()
-		CooldownFrame_SetTimer(frame.cooldown, GetTime(), frame.time, 1)
-
+		UpdateDRFrameIcon(frame, spellId)
+		StartDRTimer(frame)
 		frame.severity = math.min(frame.severity + 1, 4)
 		UpdateDRPositions(self)
 	end
 end
 
-local function SetIconZoomed(texture)
-	if not texture then return end
-	texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-end
+-- ---------------------------------------------------------------------------
+-- DR Handler creation
+-- ---------------------------------------------------------------------------
 
 local function CreateDRHandler(arenaFrame, index)
 	local drHandler = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
@@ -470,18 +553,7 @@ local function CreateDRHandler(arenaFrame, index)
 	drHandler.severity = 1
 	drHandler.time = 0
 	drHandler.starttime = 0
-	drHandler.CustomBorder = CreateCustomBorder(drHandler)
-	drHandler.cooldown:ClearAllPoints()
-	drHandler.cooldown:SetAllPoints(drHandler)
-	drHandler.cooldown:Hide()
 	drHandler:Show()
-	drHandler.Icon:SetTexture(nil)
-	drHandler.Icon:SetAllPoints(drHandler)
-	SetIconZoomed(drHandler.Icon)
-	if drHandler.texture then
-		drHandler.texture:SetAllPoints(drHandler)
-	end
-	if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
 
 	for c = 1, #drCategories do
 		local cat = drCategories[c]
@@ -491,50 +563,117 @@ local function CreateDRHandler(arenaFrame, index)
 		f.time = 0
 		f.starttime = 0
 		f.CustomBorder = CreateCustomBorder(f)
-		
-		f.cooldown:ClearAllPoints()
-		f.cooldown:SetAllPoints(f)
-		
+
+		SetupDRTimerText(f)
+		SetupDRTimerOnUpdate(f)
+
 		f.Icon:SetAllPoints(f)
 		SetIconZoomed(f.Icon)
-		if f.texture then
-			f.texture:SetAllPoints(f)
-		end
-		
-		f:SetScript("OnUpdate", function(self, elapsed)
-			if self.starttime and self.time and self.time > 0 then
-				if GetTime() >= (self.starttime + self.time) then
-					self.time = 0
-					self.starttime = 0
-					self.severity = 1
-					self:Hide()
-					if self.CustomBorder then self.CustomBorder:Hide() end
-					UpdateDRPositions(self:GetParent())
-				end
-			end
-		end)
 
-		-- Attach drag to each child icon, moving the parent drHandler
-		f:SetMovable(true)
-		if addon.SetupDrag then
-			addon:SetupDrag(module, true, f, drHandler)
-		end
-
+		SetupDRDrag(f, drHandler)
 		drHandler[cat] = f
 	end
 
 	drHandler.COMBAT_LOG_EVENT_UNFILTERED = DR_COMBAT_LOG_EVENT_UNFILTERED
 	drHandler:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	
-	drHandler:SetScript("OnEvent", function(self, event, ...) 
-		if self[event] then 
-			return self[event](self, ...) 
-		end 
+
+	drHandler:SetScript("OnEvent", function(self, event, ...)
+		if self[event] then
+			return self[event](self, ...)
+		end
 	end)
-	
+
 	arenaFrame.sArenaDRHandler = drHandler
 	return drHandler
 end
+
+-- ---------------------------------------------------------------------------
+-- Event handlers
+-- ---------------------------------------------------------------------------
+
+local function HandleADDON_LOADED(drHandler)
+	drHandler:SetFrameLevel(7)
+end
+
+local function HandleTEST_MODE(drHandler)
+	drHandler.Icon:SetTexture(nil)
+	if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
+	ResetDR(drHandler)
+
+	if not addon.testMode then return end
+	if module.db and not module.db.enable then return end
+
+	-- Build category -> spells lookup
+	local categorySpells = {}
+	for spellId, cat in pairs(drList) do
+		if not categorySpells[cat] then
+			categorySpells[cat] = {}
+		end
+		categorySpells[cat][#categorySpells[cat] + 1] = spellId
+	end
+
+	-- Shuffle categories
+	local shuffled = {}
+	for c = 1, #drCategories do
+		shuffled[c] = drCategories[c]
+	end
+	for c = #shuffled, 2, -1 do
+		local j = math.random(1, c)
+		shuffled[c], shuffled[j] = shuffled[j], shuffled[c]
+	end
+
+	-- Activate random categories
+	local numCategories = math.random(1, 3)
+	for c = 1, numCategories do
+		local cat = shuffled[c]
+		local f = drHandler[cat]
+		if f and categorySpells[cat] and #categorySpells[cat] > 0 then
+			local randomSpellId = categorySpells[cat][math.random(1, #categorySpells[cat])]
+			local _, _, texture = GetSpellInfo(randomSpellId)
+
+			f.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
+			f.severity = math.random(2, 4)
+
+			if f.CustomBorder and severityColor[f.severity] then
+				f.CustomBorder:SetVertexColor(unpack(severityColor[f.severity]))
+				f.CustomBorder:Show()
+			end
+
+			f:Show()
+			f.time = math.random(15, 25)
+			f.starttime = GetTime()
+		end
+	end
+
+	UpdateDRPositions(drHandler)
+end
+
+local function HandleUPDATE_SETTINGS(drHandler, arenaFrame)
+	if module.db and not module.db.enable then
+		ResetDR(drHandler)
+		return
+	end
+
+	drHandler:ClearAllPoints()
+	if module.db then
+		drHandler:SetPoint("CENTER", arenaFrame, "CENTER", module.db.x, module.db.y)
+		drHandler:SetSize(module.db.size, module.db.size)
+	end
+
+	for c = 1, #drCategories do
+		local f = drHandler[drCategories[c]]
+		if f and module.db then
+			f:SetSize(module.db.size, module.db.size)
+			UpdateTimerFontSize(f)
+		end
+	end
+
+	UpdateDRPositions(drHandler)
+end
+
+-- ---------------------------------------------------------------------------
+-- Module event dispatcher
+-- ---------------------------------------------------------------------------
 
 function module:OnEvent(event, ...)
 	for i = 1, (MAX_ARENA_ENEMIES or 5) do
@@ -542,83 +681,16 @@ function module:OnEvent(event, ...)
 		if not arenaFrame then break end
 
 		local drHandler = arenaFrame.sArenaDRHandler
-		
 		if not drHandler then
 			drHandler = CreateDRHandler(arenaFrame, i)
 		end
 
 		if event == "ADDON_LOADED" then
-			drHandler:SetFrameLevel(7)
-		
+			HandleADDON_LOADED(drHandler)
 		elseif event == "TEST_MODE" then
-			drHandler.Icon:SetTexture(nil)
-			if drHandler.CustomBorder then drHandler.CustomBorder:Hide() end
-			ResetDR(drHandler)
-
-			if addon.testMode and (not module.db or module.db.enable) then
-				local categorySpells = {}
-				for spellId, cat in pairs(drList) do
-					if not categorySpells[cat] then
-						categorySpells[cat] = {}
-					end
-					table.insert(categorySpells[cat], spellId)
-				end
-
-				local numCategories = math.random(1, 3)
-				local shuffled = {}
-				for c = 1, #drCategories do
-					shuffled[c] = drCategories[c]
-				end
-				for c = #shuffled, 2, -1 do
-					local j = math.random(1, c)
-					shuffled[c], shuffled[j] = shuffled[j], shuffled[c]
-				end
-
-				for c = 1, numCategories do
-					local cat = shuffled[c]
-					local f = drHandler[cat]
-					if f and categorySpells[cat] and #categorySpells[cat] > 0 then
-						local randomSpellId = categorySpells[cat][math.random(1, #categorySpells[cat])]
-						local _, _, texture = GetSpellInfo(randomSpellId)
-						
-						f.Icon:SetTexture(texture or "Interface\\Icons\\inv_misc_questionmark")
-						f.severity = math.random(2, 4)
-						
-						if f.CustomBorder and severityColor[f.severity] then
-							f.CustomBorder:SetVertexColor(unpack(severityColor[f.severity]))
-							f.CustomBorder:Show()
-						end
-						
-						f:Show()
-						local timer = math.random(15, 25)
-						f.time = timer
-						f.starttime = GetTime()
-						CooldownFrame_SetTimer(f.cooldown, GetTime(), timer, 1)
-					end
-				end
-				UpdateDRPositions(drHandler)
-			end
-
+			HandleTEST_MODE(drHandler)
 		elseif event == "UPDATE_SETTINGS" then
-			if module.db and not module.db.enable then
-				ResetDR(drHandler)
-			else
-				drHandler:ClearAllPoints()
-				if module.db then
-					drHandler:SetPoint("CENTER", arenaFrame, "CENTER", module.db.x, module.db.y)
-					drHandler:SetSize(module.db.size, module.db.size)
-				end
-				
-				for c = 1, #drCategories do
-					local cat = drCategories[c]
-					if drHandler[cat] and module.db then
-						drHandler[cat]:SetSize(module.db.size, module.db.size)
-					end
-				end
-				
-				UpdateDRPositions(drHandler)
-			end
-
+			HandleUPDATE_SETTINGS(drHandler, arenaFrame)
 		elseif event == "PLAYER_ENTERING_WORLD" then
 			ResetDR(drHandler)
 		end
