@@ -150,10 +150,10 @@ function module:OnEvent(event, ...)
                     petFrame:Show()
                 else
                     petFrame.healthbar.lockColor = false
-                    petFrame:Hide()
                 end
 
             elseif event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" then
+               if InCombatLockdown() then return end
                 petFrame:SetScale(self.db.scale)
                 ProtectBar(petFrame.healthbar, self.db.barTexture)
 
