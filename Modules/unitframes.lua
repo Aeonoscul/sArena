@@ -46,6 +46,10 @@ module.optionsTable = {
     }
 }
 
+-- ---------------------------------------------------------------------------
+-- Frame takeover (runs at file load)
+-- ---------------------------------------------------------------------------
+
 local hiddenFrame = CreateFrame("Frame", nil, UIParent)
 hiddenFrame:Hide()
 
@@ -72,101 +76,131 @@ end
 
 local firstPlayerEnteringWorld = false
 
+-- ---------------------------------------------------------------------------
+-- Event handlers
+-- ---------------------------------------------------------------------------
+
+local function HandleADDON_LOADED()
+    for i = 1, MAX_ARENA_ENEMIES do
+        local arenaFrame = _G["ArenaEnemyFrame" .. i]
+        if arenaFrame then
+            addon:SetupDrag(module, true, arenaFrame, sArenaEnemyFrames)
+            addon:SetupDrag(module, true, arenaFrame.healthbar, sArenaEnemyFrames)
+            addon:SetupDrag(module, true, arenaFrame.manabar, sArenaEnemyFrames)
+        end
+    end
+end
+
+local function HandlePLAYER_ENTERING_WORLD()
+    if not firstPlayerEnteringWorld then
+        sArenaEnemyFrames:Show()
+        firstPlayerEnteringWorld = true
+    end
+end
+
+local function HandleTEST_MODE()
+    local testClasses = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
+    
+    for i = 1, 3 do
+        local arenaFrame = _G["ArenaEnemyFrame" .. i]
+        if arenaFrame then
+            if addon.testMode then
+                ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
+
+                arenaFrame.healthbar.lockColor = true
+                arenaFrame.manabar.lockColor = true
+
+                local randomClass = testClasses[math.random(1, #testClasses)]
+                local c = RAID_CLASS_COLORS[randomClass]
+                
+                local r, g, b = 0.5, 0.5, 0.5
+                if c then
+                    r, g, b = c.r, c.g, c.b
+                end
+                
+                arenaFrame.healthbar:SetMinMaxValues(0, 100)
+                arenaFrame.healthbar:SetValue(100)
+                arenaFrame.healthbar:SetStatusBarColor(r, g, b)
+                arenaFrame.healthbar.forceHideText = false
+                
+                if arenaFrame.classPortrait then
+                    arenaFrame.classPortrait:SetTexture("Interface/TargetingFrame/UI-Classes-Circles")
+                    local coords = CLASS_ICON_TCOORDS[randomClass]
+                    if coords then
+                        arenaFrame.classPortrait:SetTexCoord(unpack(coords))
+                    else
+                        arenaFrame.classPortrait:SetTexCoord(0, 1, 0, 1)
+                    end
+                    arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
+                end
+
+                arenaFrame.manabar:SetMinMaxValues(0, 100)
+                arenaFrame.manabar:SetValue(100)
+                arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
+                arenaFrame.manabar.forceHideText = false
+                
+                arenaFrame.name:SetText("arena" .. i)
+                arenaFrame:Show()
+            else
+                arenaFrame.healthbar.lockColor = false
+                arenaFrame.manabar.lockColor = false
+                if arenaFrame.classPortrait then
+                    arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
+                end
+                arenaFrame:Hide()
+            end
+        end
+    end
+end
+
+local function HandleUPDATE_SETTINGS()
+    if not sArenaEnemyFrames then return end
+    
+    sArenaEnemyFrames:ClearAllPoints()
+    sArenaEnemyFrames:SetPoint("CENTER", UIParent, "CENTER", module.db.x or 0, module.db.y or 0)
+    sArenaEnemyFrames:SetScale(module.db.scale or 1)
+    
+    for i = 1, MAX_ARENA_ENEMIES do
+        local arenaFrame = _G["ArenaEnemyFrame" .. i]
+        if arenaFrame then
+            arenaFrame.name:SetShown(not module.db.hideNames)
+            arenaFrame:ClearAllPoints()
+            if i == 1 then
+                arenaFrame:SetPoint("TOPLEFT", sArenaEnemyFrames, "TOPLEFT", 0, 0)
+            else
+                arenaFrame:SetPoint("TOP", _G["ArenaEnemyFrame" .. i - 1], "BOTTOM", 0, (module.db.frameSpacing or 10) * -1)
+            end
+        end
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Module event dispatcher
+-- ---------------------------------------------------------------------------
+
 function module:OnEvent(event, ...)
     if event == "UNIT_AURA" then
         return
     end
 
     if event == "ADDON_LOADED" then
-        for i = 1, MAX_ARENA_ENEMIES do
-            local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            if arenaFrame then
-                addon:SetupDrag(module, true, arenaFrame, sArenaEnemyFrames)
-                addon:SetupDrag(module, true, arenaFrame.healthbar, sArenaEnemyFrames)
-                addon:SetupDrag(module, true, arenaFrame.manabar, sArenaEnemyFrames)
-            end
-        end
+        HandleADDON_LOADED()
         self:OnEvent("UPDATE_SETTINGS")
 
     elseif event == "PLAYER_ENTERING_WORLD" then
-        if not firstPlayerEnteringWorld then
-            sArenaEnemyFrames:Show()
-            firstPlayerEnteringWorld = true
-        end
+        HandlePLAYER_ENTERING_WORLD()
+
     elseif event == "TEST_MODE" then
-        local testClasses = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
-        
-        for i = 1, 3 do
-            local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            if arenaFrame then
-                if addon.testMode then
-                    ArenaEnemyFrame_SetMysteryPlayer(arenaFrame)
+        HandleTEST_MODE()
 
-                    arenaFrame.healthbar.lockColor = true
-                    arenaFrame.manabar.lockColor = true
-
-                    local randomClass = testClasses[math.random(1, #testClasses)]
-                    local c = RAID_CLASS_COLORS[randomClass]
-                    
-                    local r, g, b = 0.5, 0.5, 0.5
-                    if c then
-                        r, g, b = c.r, c.g, c.b
-                    end
-                    
-                    arenaFrame.healthbar:SetMinMaxValues(0, 100)
-                    arenaFrame.healthbar:SetValue(100)
-                    arenaFrame.healthbar:SetStatusBarColor(r, g, b)
-                    arenaFrame.healthbar.forceHideText = false
-                    
-                    if arenaFrame.classPortrait then
-                        arenaFrame.classPortrait:SetTexture("Interface/TargetingFrame/UI-Classes-Circles")
-                        local coords = CLASS_ICON_TCOORDS[randomClass]
-                        if coords then
-                            arenaFrame.classPortrait:SetTexCoord(unpack(coords))
-                        else
-                            arenaFrame.classPortrait:SetTexCoord(0, 1, 0, 1)
-                        end
-                        arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
-                    end
-
-                    arenaFrame.manabar:SetMinMaxValues(0, 100)
-                    arenaFrame.manabar:SetValue(100)
-                    arenaFrame.manabar:SetStatusBarColor(0, 0, 1)
-                    arenaFrame.manabar.forceHideText = false
-                    
-                    arenaFrame.name:SetText("arena" .. i)
-                    arenaFrame:Show()
-                else
-                    arenaFrame.healthbar.lockColor = false
-                    arenaFrame.manabar.lockColor = false
-                    if arenaFrame.classPortrait then
-                        arenaFrame.classPortrait:SetVertexColor(1, 1, 1, 1)
-                    end
-                    arenaFrame:Hide()
-                end
-            end
-        end
     elseif event == "UPDATE_SETTINGS" then
-        if not sArenaEnemyFrames then return end
-        
-        sArenaEnemyFrames:ClearAllPoints()
-        sArenaEnemyFrames:SetPoint("CENTER", UIParent, "CENTER", self.db.x or 0, self.db.y or 0)
-        sArenaEnemyFrames:SetScale(self.db.scale or 1)
-        
-        for i = 1, MAX_ARENA_ENEMIES do
-            local arenaFrame = _G["ArenaEnemyFrame" .. i]
-            if arenaFrame then
-                arenaFrame.name:SetShown(not self.db.hideNames)
-                arenaFrame:ClearAllPoints()
-                if i == 1 then
-                    arenaFrame:SetPoint("TOPLEFT", sArenaEnemyFrames, "TOPLEFT", 0, 0)
-                else
-                    arenaFrame:SetPoint("TOP", _G["ArenaEnemyFrame" .. i - 1], "BOTTOM", 0, (self.db.frameSpacing or 10) * -1)
-                end
-            end
-        end
+        HandleUPDATE_SETTINGS()
     end
 end
+
+-- ---------------------------------------------------------------------------
+-- Class-colored health bars (hooks)
+-- ---------------------------------------------------------------------------
 
 local healthBars = {
     ArenaEnemyFrame1HealthBar = 1,

@@ -54,9 +54,59 @@ module.optionsTable = {
     }
 }
 
+-- ---------------------------------------------------------------------------
+-- Event handlers
+-- ---------------------------------------------------------------------------
+
+local function HandleADDON_LOADED(castBar)
+    castBar:SetMovable(true)
+    addon:SetupDrag(module, true, castBar)
+    castBar:SetFrameLevel(6)
+end
+
+local function HandleTEST_MODE(castBar, barSpark, barText, barIcon)
+    if addon.testMode and module.db.enable then
+        castBar:EnableMouse(true)
+        castBar.fadeOut = nil
+        castBar.flash = nil
+        barIcon:SetTexture(GetMacroIconInfo(math.random(1, GetNumMacroIcons())))
+        barText:SetText(GetSpellInfo(118))
+        barSpark:SetPoint("CENTER", castBar, "LEFT", castBar:GetWidth() * 0.5, 0)
+        castBar:SetMinMaxValues(0, 100)
+        castBar:SetValue(50)
+        castBar:Show()
+        barSpark:Show()
+    else
+        castBar:EnableMouse(false)
+        CastingBarFrame_FinishSpell(castBar)
+    end
+end
+
+local function HandleUPDATE_SETTINGS(castBar, barSpark, barText, barIcon, textBorder)
+    castBar.showCastbar = module.db.enable
+    CastingBarFrame_UpdateIsShown(castBar)
+
+    castBar:ClearAllPoints()
+    castBar:SetPoint("CENTER", module.db.x, module.db.y)
+    castBar:SetScale(module.db.scale)
+    castBar:SetSize(module.db.width, module.db.height)
+    barIcon:SetSize(module.db.height * 1.2, module.db.height * 1.2)
+    barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
+    barText:SetDrawLayer("OVERLAY", 0)
+    barText:ClearAllPoints()
+    barText:SetPoint("CENTER", castBar, "CENTER", 0, 0)
+    if textBorder and textBorder:Hide() then
+        textBorder:Hide()
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Module event dispatcher
+-- ---------------------------------------------------------------------------
+
 function module:OnEvent(event, ...)
     if event == "UNIT_AURA" then
-        return;
+        return
     end
 
     for i = 1, MAX_ARENA_ENEMIES do
@@ -64,49 +114,14 @@ function module:OnEvent(event, ...)
         local barSpark = _G[castBar:GetName() .. "Spark"]
         local barText = castBar.Text
         local barIcon = _G[castBar:GetName() .. "Icon"]
-        local textBorder
-        if castBar.TextBorder then
-            textBorder = castBar.TextBorder
-        end
+        local textBorder = castBar.TextBorder
 
         if event == "ADDON_LOADED" then
-            castBar:SetMovable(true)
-            addon:SetupDrag(self, true, castBar)
-
-            castBar:SetFrameLevel(6)
+            HandleADDON_LOADED(castBar)
         elseif event == "TEST_MODE" then
-            if addon.testMode and self.db.enable then
-                castBar:EnableMouse(true)
-                castBar.fadeOut = nil
-                castBar.flash = nil
-                barIcon:SetTexture(GetMacroIconInfo(math.random(1, GetNumMacroIcons())))
-                --barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
-                barText:SetText(GetSpellInfo(118))
-                barSpark:SetPoint("CENTER", castBar, "LEFT", castBar:GetWidth() * 0.5, 0)
-                castBar:SetMinMaxValues(0, 100)
-                castBar:SetValue(50)
-                castBar:Show()
-                barSpark:Show()
-            else
-                castBar:EnableMouse(false)
-                CastingBarFrame_FinishSpell(castBar)
-            end
+            HandleTEST_MODE(castBar, barSpark, barText, barIcon)
         elseif event == "UPDATE_SETTINGS" then
-            castBar.showCastbar = self.db.enable
-            CastingBarFrame_UpdateIsShown(castBar)
-
-            castBar:ClearAllPoints()
-            castBar:SetPoint("CENTER", self.db.x, self.db.y)
-            castBar:SetScale(self.db.scale)
-            castBar:SetSize(self.db.width, self.db.height)
-            barIcon:SetSize(self.db.height*1.2, self.db.height*1.2)
-            barIcon:SetPoint("RIGHT", castBar, "LEFT", 0, 0)
-            barText:SetDrawLayer("OVERLAY", 0)
-            barText:ClearAllPoints()
-            barText:SetPoint("CENTER", castBar, "CENTER", 0, 0)
-            if textBorder and textBorder:Hide() then
-                textBorder:Hide()
-            end
+            HandleUPDATE_SETTINGS(castBar, barSpark, barText, barIcon, textBorder)
         end
     end
 

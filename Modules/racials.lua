@@ -172,33 +172,11 @@ module.optionsTable = {
 	}
 }
 
-function RACIAL_UNIT_SPELLCAST_SUCCEEDED_SECOND_TRY(self, unit, ability)
-    if self.unit ~= unit or nil then return end
+-- ---------------------------------------------------------------------------
+-- COMBAT_LOG_EVENT_UNFILTERED handler
+-- ---------------------------------------------------------------------------
 
-    local spellId
-
-    if ability == 'Духовные крылья' then
-        spellId = 320552
-    elseif ability == GetSpellInfo(375040)  then
-        spellId = 375040
-    elseif ability == GetSpellInfo(374994) then
-        spellId = 374994
-    elseif ability == GetSpellInfo(375010) then
-        spellId = 375010
-    end
-
-    if not spellId then return end
-    for race, raceData in pairs(constellations2Spells) do
-        if spellId == raceData.id or (raceData.alt and raceData.alt[tostring(spellId)]) then
-            isRun = true
-            self.time = tonumber(raceData.cd)
-            self.starttime = GetTime()
-            CooldownFrame_SetTimer(self.cooldown, GetTime(), raceData.cd, 1)
-        end
-    end
-end
-
-function RACIAL_UNIT_SPELLCAST_SUCCEEDED(self, ...)
+local function HandleCOMBAT_LOG_EVENT_UNFILTERED(self, ...)
 	local _, event, sourceGUID, sourceName, _, destGUID, destName, _, spellId, spellName, _, _, _, _, _ = select(1,...)
 
 	if UnitGUID(self.unit) ~= sourceGUID then return end
@@ -236,6 +214,92 @@ function RACIAL_UNIT_SPELLCAST_SUCCEEDED(self, ...)
 	end
 end
 
+-- ---------------------------------------------------------------------------
+-- UNIT_SPELLCAST_SUCCEEDED handler
+-- ---------------------------------------------------------------------------
+
+local function HandleUNIT_SPELLCAST_SUCCEEDED(self, unit, ability)
+    if self.unit ~= unit or nil then return end
+
+    local spellId
+
+    if ability == 'Духовные крылья' then
+        spellId = 320552
+    elseif ability == GetSpellInfo(375040)  then
+        spellId = 375040
+    elseif ability == GetSpellInfo(374994) then
+        spellId = 374994
+    elseif ability == GetSpellInfo(375010) then
+        spellId = 375010
+    end
+
+    if not spellId then return end
+    for race, raceData in pairs(constellations2Spells) do
+        if spellId == raceData.id or (raceData.alt and raceData.alt[tostring(spellId)]) then
+            isRun = true
+            self.time = tonumber(raceData.cd)
+            self.starttime = GetTime()
+            CooldownFrame_SetTimer(self.cooldown, GetTime(), raceData.cd, 1)
+        end
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Event handlers
+-- ---------------------------------------------------------------------------
+
+local function HandleADDON_LOADED(racial)
+    racial:SetMovable(true)
+    addon:SetupDrag(module, true, racial)
+
+    racial:SetFrameLevel(5)
+
+    racial.cooldown:ClearAllPoints()
+    racial.cooldown:SetPoint("TOPLEFT", 1, -1)
+    racial.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+end
+
+local function HandleTEST_MODE(racial)
+    if addon.testMode then
+        racial:EnableMouse(true)
+        local rndValue = math.random(#constellations - 1)
+        racial.Icon:SetTexture(constellations2Spells[constellations[rndValue]].icon)
+        racial.cooldown:SetCooldown(GetTime(), random(30,120))
+    else
+        racial:EnableMouse(false)
+        racial.Icon:SetTexture(nil)
+        racial.cooldown:Hide()
+    end
+end
+
+local function HandleUPDATE_SETTINGS(racial)
+    racial:ClearAllPoints()
+    racial:SetPoint("CENTER", module.db.x, module.db.y)
+    racial:SetSize(module.db.size, module.db.size)
+end
+
+-- ---------------------------------------------------------------------------
+-- Racial handler creation
+-- ---------------------------------------------------------------------------
+
+local function CreateRacialHandler(arenaFrame, index)
+    local racial = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
+    racial.unit = arenaFrame.unit
+    racial.time = 0
+    racial.starttime = 0
+    racial:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    racial:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    racial:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
+    racial.COMBAT_LOG_EVENT_UNFILTERED = HandleCOMBAT_LOG_EVENT_UNFILTERED
+    racial.UNIT_SPELLCAST_SUCCEEDED = HandleUNIT_SPELLCAST_SUCCEEDED
+    arenaFrame.racial = racial
+    return racial
+end
+
+-- ---------------------------------------------------------------------------
+-- Module event dispatcher
+-- ---------------------------------------------------------------------------
+
 function module:OnEvent(event, ...)
     if event == "UNIT_AURA" then
         local __unit = select(1, ...)
@@ -250,59 +314,29 @@ function module:OnEvent(event, ...)
     end
 
     for i = 1, MAX_ARENA_ENEMIES do
-        local CC = nil
         local arenaFrame = _G["ArenaEnemyFrame"..i]
-        
-        if (arenaFrame["racial"] == nil) then
-            CC = CreateFrame("Frame", nil, arenaFrame, "sArenaIconTemplate")
-            CC.unit = arenaFrame.unit
-            CC.time = 0
-            CC.starttime = 0
-            CC:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            CC:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-            CC:SetScript("OnEvent", function(self, event, ...) return self[event](self, ...) end)
-            arenaFrame.racial = CC
-        else
-            CC = arenaFrame.racial
+        local racial = arenaFrame.racial
+
+        if not racial then
+            racial = CreateRacialHandler(arenaFrame, i)
         end
 
-        CC.COMBAT_LOG_EVENT_UNFILTERED = RACIAL_UNIT_SPELLCAST_SUCCEEDED
-        CC.UNIT_SPELLCAST_SUCCEEDED = RACIAL_UNIT_SPELLCAST_SUCCEEDED_SECOND_TRY
-
         if event == "UNIT_AURA" then
-            local raceData = addon.detectConstellation(CC.unit)
+            local raceData = addon.detectConstellation(racial.unit)
 
             if raceData then
-                CC.Icon:SetTexture(raceData.icon)
+                racial.Icon:SetTexture(raceData.icon)
             end
         else
-            CC.cooldown:SetCooldown(0, 0)
+            racial.cooldown:SetCooldown(0, 0)
         end
 
         if event == "ADDON_LOADED" then
-            CC:SetMovable(true)
-            addon:SetupDrag(self, true, CC)
-
-            CC:SetFrameLevel(5)
-
-            CC.cooldown:ClearAllPoints()
-            CC.cooldown:SetPoint("TOPLEFT", 1, -1)
-            CC.cooldown:SetPoint("BOTTOMRIGHT", -1, 1)
+            HandleADDON_LOADED(racial)
         elseif event == "TEST_MODE" then
-            if addon.testMode then
-                CC:EnableMouse(true)
-                local rndValue = math.random(#constellations - 1)
-                CC.Icon:SetTexture(constellations2Spells[constellations[rndValue]].icon)
-                CC.cooldown:SetCooldown(GetTime(), random(30,120))
-            else
-                CC:EnableMouse(false)
-                CC.Icon:SetTexture(nil)
-                CC.cooldown:Hide()
-            end
+            HandleTEST_MODE(racial)
         elseif event == "UPDATE_SETTINGS" then
-            CC:ClearAllPoints()
-            CC:SetPoint("CENTER", self.db.x, self.db.y)
-            CC:SetSize(self.db.size, self.db.size)
+            HandleUPDATE_SETTINGS(racial)
         end
     end
 

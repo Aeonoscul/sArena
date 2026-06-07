@@ -130,6 +130,49 @@ local function ProtectBar(bar, barTexture)
     end
 end
 
+-- ---------------------------------------------------------------------------
+-- Event handlers
+-- ---------------------------------------------------------------------------
+
+local function HandleTEST_MODE(petFrame)
+    if addon.testMode and GetCVar("showArenaEnemyPets") == "1" then
+        petFrame.healthbar.lockColor = true
+        petFrame.healthbar:SetMinMaxValues(0, 100)
+        petFrame.healthbar:SetValue(100)
+        petFrame.healthbar:SetStatusBarColor(0, 1, 0)
+        petFrame.healthbar.forceHideText = false
+        petFrame:Show()
+    else
+        petFrame.healthbar.lockColor = false
+    end
+end
+
+local function HandleUPDATE_SETTINGS(petFrame, arenaFrame)
+    if InCombatLockdown() then return end
+
+    petFrame:SetScale(module.db.scale)
+    ProtectBar(petFrame.healthbar, module.db.barTexture)
+
+    if not petFrame.isMoving then
+        petFrame:ClearAllPoints()
+        petFrame:SetPoint("CENTER", arenaFrame, "CENTER", module.db.x, module.db.y)
+    end
+
+    if arenaFrame.texture then
+        local frameStylesModule = addon.modules["Frame Styles"] or addon.modules["Unit Frames"]
+        if frameStylesModule and frameStylesModule.db then
+            local currentLayout = addon.layouts[frameStylesModule.db.frameStyle]
+            if currentLayout and currentLayout.SetFrameStyle then
+                currentLayout:SetFrameStyle(arenaFrame, frameStylesModule.db)
+            end
+        end
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Module event dispatcher
+-- ---------------------------------------------------------------------------
+
 function module:OnEvent(event, ...)
     if event == "UNIT_AURA" then
         return
@@ -141,42 +184,11 @@ function module:OnEvent(event, ...)
 
         if petFrame then
             if event == "TEST_MODE" then
-                if addon.testMode and GetCVar("showArenaEnemyPets") == "1" then
-                    petFrame.healthbar.lockColor = true
-                    petFrame.healthbar:SetMinMaxValues(0, 100)
-                    petFrame.healthbar:SetValue(100)
-                    petFrame.healthbar:SetStatusBarColor(0, 1, 0)
-                    petFrame.healthbar.forceHideText = false
-                    petFrame:Show()
-                else
-                    petFrame.healthbar.lockColor = false
-                end
-
+                HandleTEST_MODE(petFrame)
             elseif event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" then
-               if InCombatLockdown() then return end
-                petFrame:SetScale(self.db.scale)
-                ProtectBar(petFrame.healthbar, self.db.barTexture)
-
-                if arenaFrame.texture then
-                    local frameStylesModule = addon.modules["Frame Styles"] or addon.modules["Unit Frames"]
-                    if frameStylesModule and frameStylesModule.db then
-                        local currentLayout = addon.layouts[frameStylesModule.db.frameStyle]
-                        if currentLayout and currentLayout.SetFrameStyle then
-                            currentLayout:SetFrameStyle(arenaFrame, frameStylesModule.db)
-                        end
-                    end
-                end
+                HandleUPDATE_SETTINGS(petFrame, arenaFrame)
             end
 
-             if event == "UPDATE_SETTINGS" or event == "PLAYER_ENTERING_WORLD" or event == "TEST_MODE" then
-                if not petFrame.isMoving then
-                    petFrame:ClearAllPoints()
-                    
-                    local offsetY = self.db.y - ((i - 1) * self.db.frameSpacing)
-                    
-                     petFrame:SetPoint("CENTER", arenaFrame, "CENTER", self.db.x, offsetY)
-                end
-            end
         end
     end
 end
