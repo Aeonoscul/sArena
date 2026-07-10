@@ -3,15 +3,15 @@ local module = addon:CreateModule("Pet Frames")
 local Media = LibStub("LibSharedMedia-3.0")
 
 module.defaultSettings = {
-    x = -22,
-    y = -42,
-    scale = 0.7,
+    x = -23,
+    y = -25,
+    scale = 1,
     healthBarWidth = 50,
     healthBarHeight = 14,
     powerBarHeight = 8,
     barTexture = "Interface\\AddOns\\sArena\\Media\\statusbar",
-    frameSpacing = 0,
-    }
+    frameSpacing = 21
+}
 
 module.optionsTable = {
     enable = {
@@ -116,17 +116,62 @@ for i = 1, MAX_ARENA_ENEMIES do
 end
 
 local function ProtectBar(bar, barTexture)
-    if not bar then return end
+    if not bar then
+        return
+    end
     bar:SetStatusBarTexture(barTexture)
     local tex = bar:GetStatusBarTexture()
     if tex then
         if not tex.Hooked then
             tex:SetTexCoord(0, 1, 0, 1)
-            tex.SetTexCoord = function() end
+            tex.SetTexCoord = function()
+            end
             tex.Hooked = true
         else
             tex:SetTexCoord(0, 1, 0, 1)
         end
+    end
+end
+
+local function PositionFrames()
+    if InCombatLockdown() then
+        return
+    end
+
+    local visiblePets = {}
+    for i = 1, MAX_ARENA_ENEMIES do
+        local arenaFrame = _G["ArenaEnemyFrame" .. i]
+        if arenaFrame then
+            local petFrame = arenaFrame.petFrame
+            if petFrame and petFrame:IsShown() then
+                table.insert(visiblePets, {
+                    frame = petFrame,
+                    index = i,
+                    arena = arenaFrame
+                })
+            end
+        end
+    end
+
+    if #visiblePets == 0 then
+        return
+    end
+
+    table.sort(visiblePets, function(a, b)
+        return a.index < b.index
+    end)
+
+    local first = visiblePets[1]
+    first.frame:ClearAllPoints()
+    first.frame:SetPoint("CENTER", first.arena, "CENTER", module.db.x, module.db.y)
+
+    for idx = 2, #visiblePets do
+        local curr = visiblePets[idx].frame
+        local prev = visiblePets[idx - 1].frame
+
+        curr:ClearAllPoints()
+        curr:SetPoint("LEFT", first.frame, "LEFT", 0, 0)
+        curr:SetPoint("TOP", prev, "BOTTOM", 0, -module.db.frameSpacing)
     end
 end
 
@@ -142,20 +187,23 @@ local function HandleTEST_MODE(petFrame)
         petFrame.healthbar:SetStatusBarColor(0, 1, 0)
         petFrame.healthbar.forceHideText = false
         petFrame:Show()
+        PositionFrames()
     else
         petFrame.healthbar.lockColor = false
     end
 end
 
 local function HandleUPDATE_SETTINGS(petFrame, arenaFrame)
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        return
+    end
 
     petFrame:SetScale(module.db.scale)
     ProtectBar(petFrame.healthbar, module.db.barTexture)
 
     if not petFrame.isMoving then
         petFrame:ClearAllPoints()
-        petFrame:SetPoint("CENTER", arenaFrame, "CENTER", module.db.x, module.db.y)
+        PositionFrames()
     end
 
     if arenaFrame.texture then

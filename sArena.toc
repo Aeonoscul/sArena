@@ -2,7 +2,7 @@
 ## Title: sArena
 ## Notes: |@Version: 5@|Improved arena frames.
 ## Author: Stako/Qblolz/Aeonoscul
-## Version: 1.1.1
+## Version: 1.1.2
 ## Dependencies: Blizzard_ArenaUI
 
 ## SavedVariables: sArenaDB
